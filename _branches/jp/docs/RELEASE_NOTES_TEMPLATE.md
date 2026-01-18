@@ -1,247 +1,243 @@
-## 🏷️ Release Notes Template
+# Release Notes Template (JP)
 
-**이 템플릿을 사용하여 GitHub Release를 작성하세요.**
+**GitHub Release 작성용 템플릿**
 
 ---
 
-### Release Title
+## 📋 Release Title 형식
 
+```
+v2026.MM.DD - [간단한 설명]
+```
+
+**예시**:
 ```
 v2026.01.18 - Dashboard Unification & Stabilization
+v2026.02.15 - Hotfix: Login Session Fix
 ```
 
-### Release Description
+---
+
+## 📝 Release Description 템플릿
+
+아래 마크다운을 복사하여 GitHub Release 본문에 붙여넣으세요.
 
 ```markdown
-## 📋 Overview
+# Release v2026.MM.DD
 
-**Version**: v2026.01.18  
-**Release Date**: 2026-01-18  
-**Status**: Stable  
-**Base**: 0118_v4
-
----
-
-## ✨ What's New
-
-### Features
-- GM dashboard layout unification (2-column grid, 260px chart height)
-- Multi-language support (ko/ja/en) for Master list
-- Deployment manifest validation framework
-- Stabilization policy documentation
-
-### Improvements
-- Extract common CSS to `includes/gm_dashboard_ui.php`
-- Unified chart sizing across all dashboards
-- Responsive design (mobile: 1 column < 980px)
-- PR template with comprehensive checklist
-
-### Bug Fixes
-- Fix missing PHP tag in admin_dashboard_content.php
-- Fix hardcoded Japanese text in i18n files
-- Ensure agent_dividend_chart.php session safety
+**배포일**: YYYY-MM-DD  
+**기준 브랜치**: main  
+**이전 버전**: vYYYY.MM.DD
 
 ---
 
-## 📦 Changed Files
+## 🎯 주요 변경 사항
 
-### Core Files
-- `includes/gm_dashboard_ui.php` (new)
-- `gm_dashboard_content.php`
-- `admin_dashboard_content.php`
-- `master_dashboard_content.php`
-- `investor_dashboard_content.php`
-- `agent_dividend_chart.php`
+### ✨ 신규 기능
+- (예) GM 대시보드 레이아웃 통합
+- (예) 다국어 지원 (ko/ja/en)
 
-### Language Files
-- `lang/ko.php` (+16 keys)
-- `lang/ja.php` (+16 keys)
-- `lang/en.php` (+16 keys)
+### 🐛 버그 수정
+- (예) 로그인 세션 만료 문제 해결
+- (예) 일본어 텍스트 깨짐 수정
 
-### Documentation
-- `docs/BRANCH_POLICY.md`
-- `docs/DEPLOY.md`
-- `docs/REGRESSION_CHECKLIST.md`
-- `docs/WORKFLOW.md`
-- `docs/CONVENTIONAL_COMMITS.md`
-- `.github/PULL_REQUEST_TEMPLATE.md`
+### 📚 문서 개선
+- (예) 배포 매니페스트 검증 프로세스 문서화
+- (예) PR 템플릿 추가
 
-### Configuration
-- `.github/PULL_REQUEST_TEMPLATE.md` (new)
+### 🔧 기술 개선
+- (예) 공통 CSS 모듈화
+- (예) 차트 크기 통일 (260px)
 
 ---
 
-## 🧪 Testing
+## 📦 변경된 파일
 
-### Regression Checklist Completed
-- ✅ Language switching (ko/ja/en) verified
-- ✅ GM dashboard layout confirmed
-- ✅ Chart sizing (260px) validated
-- ✅ File paths verified (no 404s)
-- ✅ Database queries unchanged
-- ✅ Manifest validation framework ready
+### 핵심 파일
+- `파일명.php` (신규/수정/삭제)
+- `includes/파일명.php`
 
-### Deployment Validation
-- ✅ All core files present
-- ✅ All language keys synchronized
-- ✅ No syntax errors
-- ✅ PR template loads correctly
+### 언어 파일
+- `lang/ko.php` (+N keys)
+- `lang/ja.php` (+N keys)
+- `lang/en.php` (+N keys)
+
+### 문서
+- `docs/파일명.md`
 
 ---
 
-## 📋 Breaking Changes
+## 📋 배포 체크리스트
 
-**None** - All changes are backward compatible.
+### 배포 전 확인 완료
+- [ ] 회귀 테스트 (ko/ja/en) 통과
+- [ ] KO/JP 양쪽 환경 검증
+- [ ] DB 스키마 변경 여부 확인
+- [ ] 파일 누락 없음 (manifest 검증)
+- [ ] 언어 파일 키 일치 확인
+
+### 배포 후 확인 필요
+- [ ] 운영 서버 에러 로그 확인 (1시간)
+- [ ] 주요 페이지 접속 확인
+- [ ] 언어 전환 (ko/ja/en) 정상 작동
+- [ ] 사용자 피드백 모니터링
 
 ---
 
-## 🚀 Deployment
+## ⚠️ Breaking Changes
 
-### Before Deploying
-1. Run `docs/REGRESSION_CHECKLIST.md`
-2. Verify file manifest
-3. Confirm ko/ja/en language display
-4. Check GM dashboard layout on desktop & mobile
+**없음** (또는 상세 기재)
 
-### Deployment Steps
+---
+
+## 🔗 관련 이슈 & PR
+
+- Closes #번호
+- Related: #번호
+
+---
+
+## 🚀 배포 방법
+
+### 1. 배포 전
 ```bash
-# 1. Pull latest main
+# dev 브랜치 테스트 완료 확인
+git checkout dev
+php scripts/regression_test.php
+```
+
+### 2. Release PR 생성
+```bash
+git checkout main
 git pull origin main
-
-# 2. Verify manifest
-php scripts/generate_manifest.php
-
-# 3. Deploy files
-# (your deployment command)
-
-# 4. Verify on server
-php scripts/verify_deploy.php deploy_manifest.json
-
-# 5. Confirm in browser
-# Visit each dashboard: ko/ja/en
+git checkout -b release/v2026.MM.DD dev
+git push -u origin release/v2026.MM.DD
 ```
 
-### After Deployment
-- ✅ All files uploaded
-- ✅ Manifest validation passed
-- ✅ Dashboard layout visible
-- ✅ Languages switching correctly
+### 3. GitHub에서 PR 생성 & Merge
+- Base: main
+- Compare: release/v2026.MM.DD
+- Squash merge 후 태그 생성
 
----
+### 4. 태그 생성 & 푸시
+```bash
+git checkout main
+git pull origin main
+git tag -a v2026.MM.DD -m "Release v2026.MM.DD"
+git push origin main v2026.MM.DD
+```
 
-## 📝 Notes for Team
+### 5. 배포 실행
+```bash
+# Manifest 검증
+php scripts/verify_manifest.php
 
-### For Developers
-- Start all feature branches from `dev`
-- Use Conventional Commits format
-- PR template includes checklist - use it!
+# 배포 (rsync/FTP 등)
+rsync -av --files-from=docs/DEPLOY.md ./ user@server:/path/
+```
 
-### For QA
-- Use `REGRESSION_CHECKLIST.md` before deployment
-- Test ko/ja/en for each dashboard
-- Verify GM layout: 2 columns on desktop, 1 on mobile
+### 6. 배포 후 검증
+```bash
+# 서버 파일 확인
+ssh user@server "ls -la /path/ | grep '파일명'"
 
-### For DevOps
-- Deploy using manifest validation
-- Monitor `logs/deploy/` directory
-- Verify file count matches manifest
-
-### For Product
-- Dashboard now has unified layout (professional appearance)
-- Multi-language support for all major pages
-- Stabilization policies in place for future releases
-
----
-
-## 🔗 Related Documentation
-
-- **Branch Strategy**: `docs/BRANCH_POLICY.md`
-- **Workflow**: `docs/WORKFLOW.md`
-- **Deployment Guide**: `docs/DEPLOY.md`
-- **QA Checklist**: `docs/REGRESSION_CHECKLIST.md`
-- **Commits Format**: `docs/CONVENTIONAL_COMMITS.md`
-
----
-
-## 📊 Metrics
-
-| Metric | Value |
-|--------|-------|
-| Files Changed | 15+ |
-| Language Keys Added | 48 (ko/ja/en) |
-| Documentation Pages | 6 |
-| Test Checklist Items | 7 |
-| Dashboards Unified | 5 |
-
----
-
-## ✅ Sign-off
-
-- **Code Review**: ✅ Approved
-- **QA Testing**: ✅ Passed
-- **Regression Checklist**: ✅ All items verified
-- **Deployment Manifest**: ✅ Verified
-- **Documentation**: ✅ Complete
-
----
-
-## 🎯 Next Steps (v2026-02)
-
-- [ ] Implement automated manifest generation in CI/CD
-- [ ] Add deployment webhook verification
-- [ ] Extend regression checklist with automated tests
-- [ ] KO branch synchronization workflow
-
----
-
-**Release prepared by**: GitHub Actions / Manual  
-**Release date**: 2026-01-18  
-**Version**: v2026.01.18  
+# 로그 확인
+ssh user@server "tail -f /path/logs/error.log"
 ```
 
 ---
 
-## 📌 사용 방법
+## 📞 문의
 
-### GitHub Release 생성 시
+**Release by**: @배포담당자  
+**Reviewed by**: @리뷰어1, @리뷰어2  
+**Deploy Target**: Production (15.164.165.240)
 
-1. **Releases 탭** → **Draft a new release**
-2. **Tag version**: `v2026.01.18`
-3. **Release title**: 위 템플릿의 "Release Title" 섹션 복붙
-4. **Description**: 위 템플릿의 "Release Description" 섹션 복붙
-5. **Publish release**
+---
 
-### Git Command로 생성 시
+## 📊 배포 지표
+
+| 항목 | 값 |
+|------|-----|
+| 변경 파일 수 | N개 |
+| 추가 언어 키 | N개 (ko/ja/en) |
+| 관련 이슈 | #N, #N |
+| 테스트 항목 | N개 통과 |
+
+---
+
+**Version**: v2026.MM.DD  
+**Last Updated**: YYYY-MM-DD
+```
+
+---
+
+## 🎯 GitHub Release 생성 단계
+
+### 웹 UI에서
+
+1. 레포 → **Releases** 탭 클릭
+2. **Draft a new release** 클릭
+3. **Choose a tag** → `v2026.MM.DD` 입력 (새 태그 생성)
+4. **Target**: `main` 선택
+5. **Release title**: `v2026.MM.DD - [설명]` 입력
+6. **Description**: 위 템플릿 복붙
+7. **Publish release** 클릭
+
+### CLI에서
 
 ```bash
-# Annotated tag 생성 (권장)
-git tag -a v2026.01.18 -m "Release v2026.01.18
+# 1. 태그 생성
+git tag -a v2026.MM.DD -m "Release v2026.MM.DD
 
-- Dashboard layout unification
-- Multi-language support
-- Stabilization policies"
+- 주요 변경사항 1
+- 주요 변경사항 2
+- 주요 변경사항 3
 
-# Push to GitHub
-git push origin v2026.01.18
-```
+Closes #N"
 
-### Commit 메시지 참고
+# 2. 푸시
+git push origin v2026.MM.DD
 
-```
-feat: v2026.01.18 release
-
-- GM dashboard layout unification across 5 dashboards
-- Multi-language support (ko/ja/en) for Master list
-- Common CSS extracted to includes/gm_dashboard_ui.php
-- Documentation and policies for stabilization
-- PR template with comprehensive checklist
-
-See: docs/v2026-01-STABILIZATION.md for full details
-
-Closes #1, #3, #4
+# 3. GitHub에서 Release Notes 추가
+# (웹 UI에서 Releases → 해당 태그 → Edit → Description 추가)
 ```
 
 ---
 
-**Version**: `0118_v4` (2026-01-18)  
+## 💡 작성 팁
+
+### 제목 작성
+- ✅ `v2026.01.18 - Dashboard Unification`
+- ❌ `Release 2026.01.18` (v 접두사 없음)
+- ❌ `v1.2.3` (날짜 형식 사용)
+
+### 본문 작성
+- **신규 기능**: 사용자에게 보이는 변화 중심
+- **버그 수정**: 문제/해결 명확히
+- **기술 개선**: 개발자/운영자 관점 설명
+- **Breaking Changes**: 없으면 "없음", 있으면 마이그레이션 가이드 필수
+
+### 파일 목록
+- 핵심 파일만 나열 (10개 이하 권장)
+- 경로 포함하여 명확히
+- (신규/수정/삭제) 표시
+
+### 체크리스트
+- 배포 전: 반드시 완료해야 하는 항목
+- 배포 후: 모니터링 필요 항목
+
+---
+
+## 📚 참고 문서
+
+- **브랜치 전략**: `docs/BRANCH_POLICY.md`
+- **워크플로우**: `docs/WORKFLOW.md`
+- **배포 가이드**: `docs/DEPLOY.md`
+- **회귀 테스트**: `docs/REGRESSION_CHECKLIST.md`
+- **커밋 규칙**: `docs/CONVENTIONAL_COMMITS.md`
+
+---
+
+**Template Version**: 0118_v2 (2026-01-18)  
 **Last Updated**: 2026-01-18
