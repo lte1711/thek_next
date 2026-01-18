@@ -1,0 +1,10 @@
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:12px 0 20px;}
+th,td{padding:10px 10px;border-bottom:1px solid rgba(15,23,42,0.06);font-size:13px;text-align:center;white-space:nowrap;}
+th{background:#f1f5f9;font-weight:900;}
+tr:nth-child(even) td{background:#fafafa;}
+tr:hover td{background:#eef2ff;}
+tr:last-child td{border-bottom:none;}
+.search-box{max-width:520px;margin:0 auto 12px;}
+#searchInput{width:100%;height:44px;padding:10px 12px;border-radius:14px;border:1px solid rgba(15,23,42,0.18);font-size:14px;}
+#searchInput:focus{outline:none;border-color:rgba(37,99,235,0.85);box-shadow:0 0 0 4px rgba(37,99,235,0.18);}
+@media(max-width:640px){table{display:block;overflow-x:auto;white-space:nowrap;}}

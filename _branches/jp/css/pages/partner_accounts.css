@@ -1,0 +1,2 @@
+.content-area h2{font-size:20px;font-weight:900;margin:18px 0 14px;text-align:center;}
+@media(max-width:640px){#monthlyTable,#dailyTable{display:block;overflow-x:auto;white-space:nowrap;}}

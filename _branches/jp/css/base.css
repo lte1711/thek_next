@@ -1,0 +1,10 @@
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f4f4;color:#0f172a;}
+:root{
+  --header-h:56px;--footer-h:36px;--sidebar-w:220px;
+  --bg:#1e293b;--bg2:#2a2b2d;
+  --card:#ffffff;--muted:#64748b;--border:rgba(15,23,42,0.10);
+  --primary:#2563eb;--danger:#dc2626;--success:#0f766e;
+}
+a{color:inherit;}

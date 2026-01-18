@@ -1,0 +1,49 @@
+# TheK-NEXT .gitignore
+
+# 설정 파일 (민감 정보 포함)
+config.php
+db_connect.php
+
+# 로그 파일
+logs/
+*.log
+
+# 임시 파일
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS 파일
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE 파일
+.vscode/
+.idea/
+*.sublime-*
+
+# PHP
+vendor/
+composer.lock
+.phpunit.result.cache
+
+# 업로드 파일
+uploads/
+files/
+
+# 캐시
+cache/
+*.cache
+
+# 백업 파일
+*.bak
+*.backup
+*.old
+
+# 환경별 설정
+.env
+.env.local
+.env.*.local

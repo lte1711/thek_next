@@ -1,0 +1,455 @@
+/* =========================
+   기본 리셋 & 공통 설정
+========================= */
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    height: auto; /* ✅ 고정하지 않음 */
+    background:#f4f4f4;
+    /* 헤더/푸터가 fixed이므로 본문 여백 확보 */
+    padding-top:56px;
+    padding-bottom:36px;
+    color:#0f172a;
+}
+
+/* =========================
+   상단/하단 레이아웃
+========================= */
+.site-header, .site-footer {
+    position:fixed; left:0; width:100%;
+    background:#1e293b;
+    color:#fff;
+    text-align:center;
+    z-index:1000;
+}
+.site-header {
+    top:0; height:56px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:bold; font-size:16px;
+}
+.site-footer {
+    bottom:0; height:36px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px;
+}
+
+/* =========================
+   메뉴 토글 버튼 (모바일용)
+========================= */
+/* 햄버거 버튼 기본 숨김 */
+.menu-toggle {
+  position: absolute;
+  left: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  display: none; /* 기본은 숨김 */
+}
+
+/* =========================
+   메인 레이아웃 (대시보드용)
+========================= */
+.container {
+    display: flex;
+    flex-direction: row;
+    min-height: calc(100vh - 92px); /* 56 + 36 */
+    background: #f4f4f4;
+    margin-left: 220px;        /* ✅ 사이드바 너비만큼 왼쪽 여백 */
+}
+
+/* =========================
+   사이드바
+========================= */
+.menu-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background:#1e293b; 
+    color:#fff;
+    border-right:1px solid #e5e7eb;
+    padding:12px;
+    /* ✅ fixed로 변경하여 스크롤해도 고정 */
+    position: fixed;
+    top: 56px;              /* ✅ 헤더 아래 */
+    left: 0;
+    bottom: 36px;           /* ✅ 푸터 위 */
+    height: auto;           /* ✅ top과 bottom으로 높이 자동 계산 */
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    overflow-y: auto;       /* ✅ 메뉴가 많으면 스크롤 */
+    z-index: 100;
+}
+.menu-sidebar h1 {
+    font-size:16px; margin-bottom:8px;
+    padding:6px; background:#2a2b2d; border-radius:4px;
+}
+.logout-btn {
+    display:inline-block;
+    padding:8px 16px;
+    background-color:#dc3545;
+    color:#fff;
+    text-decoration:none;
+    border-radius:4px;
+    font-weight:bold;
+}
+.menu-sidebar h1 a { color:#fff; text-decoration:none; }
+.menu-list { list-style:none; }
+.menu-list li+li { margin-top:6px; }
+.menu-list a { color:#fff; text-decoration:none; font-size:14px; }
+.menu-list a:hover { text-decoration:underline; }
+
+/* 메뉴들을 위에서 아래로 여유 있게 배치 */
+.menu-list {
+    flex-grow:1;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:10px;
+}
+
+/* =========================
+   콘텐츠 영역 (핵심 수정)
+========================= */
+.content-area {
+    flex: 1;
+    padding: 40px;             /* ✅ 여백 증가 */
+    width: 100%;
+    overflow-x: auto;
+    background: #fff;
+    min-height: calc(100vh - 92px); /* ✅ 최소 높이 */
+}
+
+/* ✅ 콘텐츠를 감싸는 래퍼 - 가운데 정렬 */
+.content-area > * {
+    max-width: 1100px;         /* ✅ 최대 너비 */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.content {
+    flex: 1;
+    padding: 40px;
+    width: 100%;
+    overflow-x: auto;
+    min-height: calc(100vh - 92px);
+}
+
+.content > * {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* =========================
+   콘텐츠 영역 내부 요소들
+========================= */
+h2, h3 {
+    margin: 24px 0 16px;       /* ✅ 제목 여백 */
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 20px;           /* ✅ 큰 제목 */
+}
+
+h3 {
+    font-size: 18px;           /* ✅ 중간 제목 */
+}
+
+.section-title {
+    text-align:center; 
+    margin: 32px 0 24px;       /* ✅ 상단 여백 더 증가 */
+    font-size:20px;            /* ✅ 18px → 20px */
+    font-weight:bold;
+}
+
+/* 차트 박스: 겹침/깨짐 방지 */
+.chart-box {
+    margin: 24px 0;            /* ✅ 좌우 auto 제거 (부모가 중앙 정렬) */
+    padding: 24px;             /* ✅ 내부 여백 증가 */
+    width: 100%;               /* ✅ 전체 너비 사용 */
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    position:relative;
+    overflow:visible; /* ✅ 잘림 방지 */
+    height:auto;      /* ✅ 고정 높이 제거 */
+}
+.chart-box canvas {
+    width:100% !important;
+    height:100% !important;
+    display:block;
+    margin: 0 auto;            /* ✅ 캔버스도 중앙 정렬 */
+}
+
+/* =========================
+   로그인 박스
+========================= */
+.login-container {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:calc(100vh - 92px);
+    background:#f4f4f4;
+}
+.login-box {
+    max-width:400px; width:100%;
+    margin:auto; padding:20px;
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.login-box label {
+    display:block; margin:8px 0 4px;
+    font-size:14px; font-weight:600;
+}
+.login-box input {
+    width:100%; padding:10px; margin-bottom:12px;
+    border:1px solid #ccc; border-radius:4px;
+}
+.login-box input:focus {
+    border-color:#007bff;
+    outline:none;
+    box-shadow:0 0 4px rgba(0,123,255,0.4);
+}
+.login-box .error {
+    color:red; margin-bottom:10px; text-align:center;
+}
+.register-link { text-align:center; margin-top:12px; }
+.register-link a {
+    color:#1e293b; text-decoration:none; font-weight:600;
+}
+.register-link a:hover { text-decoration:underline; }
+
+/* =========================
+   폼 그룹
+========================= */
+.form-group {
+    margin-bottom: 20px;       /* ✅ 15px → 20px */
+    display:flex; 
+    align-items:center;
+    gap: 12px;                 /* ✅ 요소 간 간격 */
+}
+.form-group label {
+    flex-basis: 200px;         /* ✅ 150px → 200px로 증가 */
+    flex-shrink: 0;            /* ✅ 라벨 크기 고정 */
+    font-weight:bold;
+    text-align: right;         /* ✅ 라벨 오른쪽 정렬 */
+    padding-right: 12px;       /* ✅ 입력창과 간격 */
+}
+.form-group input, .form-group select {
+    flex-grow:1; 
+    padding:8px;
+    border:1px solid #ccc; 
+    border-radius:4px;
+    max-width: 600px;          /* ✅ 입력창 최대 너비 */
+}
+.form-group label::after {
+    content:" *"; color:red; font-weight:normal;
+}
+.duplicate-check {
+    margin-left:10px;
+    font-size:0.85em;
+    color:#007bff;
+    text-decoration:underline;
+    cursor:pointer;
+}
+
+/* Profit Share 그룹 */
+.profit-share-group { display:flex; align-items:center; }
+.profit-share-group select { margin-right:5px; width:auto; }
+
+/* =========================
+   테이블 스타일
+========================= */
+table {
+    width:100%; 
+    border-collapse:collapse;
+    margin: 24px 0;            /* ✅ 좌우 auto 제거 (부모에서 제어) */
+    font-size:15px;
+    color:#333; 
+    background:#fff;
+}
+th, td {
+    border:1px solid #ccc;
+    padding:10px; text-align:center;
+}
+th {
+    background:#e2e8f0;
+    font-weight:700;
+    color:#1e293b;
+}
+tbody tr:hover { background:#f9fafb; }
+
+/* =========================
+   버튼 스타일
+========================= */
+.btn {
+    display:inline-block;
+    padding:10px 20px;         /* ✅ 크기 증가 */
+    border-radius:4px;
+    font-size:14px; font-weight:600;
+    text-decoration:none;
+    color:#fff;
+    background-color:#374151;
+    transition:background 0.2s ease, transform 0.1s ease;
+    cursor: pointer;           /* ✅ 커서 추가 */
+    border: none;              /* ✅ 버튼 기본 테두리 제거 */
+}
+.btn:hover { 
+    transform:translateY(-1px); 
+    background-color:#1f2937;
+}
+.btn:active { transform:scale(0.98); }
+
+.btn.edit, .btn.delete, .btn.confirm {
+    background-color:#374151;
+}
+.btn.edit:hover, .btn.delete:hover, .btn.confirm:hover {
+    background-color:#1f2937;
+}
+
+/* ✅ 버튼 컨테이너 중앙 정렬 */
+.button-group {
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* =========================
+   기타 유틸리티
+========================= */
+.code-cleaned { color:#374151; text-decoration:line-through; }
+.highlight { color:blue; font-weight:bold; }
+.copy-btn, .toggle-btn {
+    padding:4px 8px; font-size:12px;
+    background:#374151; color:#fff;
+    border:none; border-radius:4px;
+    cursor:pointer;
+}
+.copy-btn:hover, .toggle-btn:hover { background:#374151; }
+.code-list { display:none; margin-top:5px; }
+.dashboard-header {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:15px;
+}
+.title-link { color:#000; text-decoration:none; }
+.month-form select { padding:5px; }
+.check { color:green; font-weight:bold; }
+.fail { color:red; }
+.toggle.on {
+    background:#4CAF50; color:#fff; padding:5px 10px; border:none; border-radius:4px;
+}
+.toggle.off {
+    background:#ccc; color:#333; padding:5px 10px; border:none; border-radius:4px;
+}
+.confirm-btn {
+    background:#374151; color:#fff; padding:5px 10px; border:none; border-radius:4px; cursor:pointer;
+}
+.search-box {
+    margin:15px 0; text-align:center;
+}
+.search-box input {
+    width:60%; padding:8px;
+    border:1px solid #ccc; border-radius:4px;
+}
+
+/* ✅ 모달 스타일 */
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  width: 300px;
+  max-width: 90%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  position: relative;
+}
+.close {
+  position: absolute;
+  top: 10px; right: 10px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+/* =========================
+   반응형 설정
+========================= */
+@media (max-width: 1024px) {
+  .container {
+    display:flex;
+    flex-direction:column;
+    /* 헤더/푸터 여백은 body에서 확보됨 */
+    min-height:auto;
+    margin-left: 0;            /* ✅ 모바일에서는 여백 제거 */
+  }
+  .menu-sidebar {
+    position: relative;        /* ✅ fixed 해제 */
+    width:100%;
+    height:auto; /* 콘텐츠 길이에 맞춤 */
+    display:flex;
+    flex-direction:row;
+    overflow-x:auto;
+    padding:10px;
+    top: auto;
+    left: auto;
+    bottom: auto;
+  }
+  .menu-list {
+    flex-direction:row;
+    gap:20px;
+    margin-top:0;
+    flex-grow:0;
+  }
+  .content-area {
+    padding: 24px 20px;    /* ✅ 모바일에서는 좌우 여백 줄임 */
+    width:100%;
+    overflow-x:auto;
+    overflow-y:auto;
+    flex-grow:1;
+    min-height:auto; /* ✅ 고정 높이 제거 */
+  }
+}
+
+/* 모바일 크기에서 햄버거 버튼 표시, 사이드바 숨김 */
+@media (max-width: 768px) {
+  .container {
+    margin-left: 0;            /* ✅ 모바일에서는 여백 제거 */
+  }
+  .menu-toggle {
+    display: block; /* 버튼 보이기 */
+  }
+  .menu-sidebar {
+    position: fixed;
+    top: 56px; /* 헤더 아래 */
+    left: -220px; /* 화면 밖으로 숨김 */
+    width: 220px;
+    height: calc(100vh - 92px);
+    background: #1e293b;
+    transition: left 0.3s ease;
+    z-index: 999;
+    flex-direction: column;  /* ✅ 모바일에서는 세로 배치 */
+    bottom: auto;              /* ✅ bottom 초기화 */
+  }
+  .menu-sidebar.active {
+    left: 0; /* 버튼 클릭 시 나타남 */
+  }
+  .content-area {
+    padding: 20px 16px;    /* ✅ 작은 화면에서는 더 줄임 */
+  }
+}
+
+
+/* keep logout at bottom (sidebar flex column) */
+.logout-btn{margin-top:auto;}

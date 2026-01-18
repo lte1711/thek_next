@@ -1,0 +1,162 @@
+label{
+  display:block;
+  font-size:13px;
+  font-weight:800;
+  margin:10px 0 6px;
+}
+
+input,select,textarea{
+  width:100%;
+  min-height:44px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(15,23,42,0.18);
+  font-size:14px;
+  background:#fff;
+}
+
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:rgba(37,99,235,0.85);
+  box-shadow:0 0 0 4px rgba(37,99,235,0.18);
+}
+
+/* =========================
+   Form rows (label + field)
+   - Desktop/Tablet: label on the left
+   - Mobile: stack (label on top)
+   ========================= */
+.form-group{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.form-group > label{
+  margin:0;
+  flex:0 0 190px;
+  text-align:right;
+  padding-right:12px;
+  font-weight:900;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+  flex:1 1 auto;
+  max-width:680px;
+  width:auto !important; /* override legacy inline width:100% */
+}
+
+/* Optional helper text / buttons next to fields (e.g., duplicate-check) */
+.form-group .duplicate-check{
+  flex:0 0 auto;
+  margin-left:6px;
+  white-space:nowrap;
+}
+
+/* When a form-group contains a readonly box instead of an input */
+.form-group .readonly-box{
+  flex:1 1 auto;
+  max-width:680px;
+}
+
+.form-inline{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  margin:10px 0 14px;
+}
+
+.form-inline input[type='date'],
+.form-inline input[type='month']{
+  width:auto;
+  min-height:40px;
+  padding:6px 10px;
+  border-radius:10px;
+}
+
+.form-inline button{
+  min-height:40px;
+  padding:0 14px;
+  border-radius:10px;
+  border:none;
+  background:var(--primary);
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.form-inline button[type='button']{
+  background:var(--success);
+}
+
+.form-card{
+  max-width:760px;
+  margin:0 auto;
+}
+
+.page-title{
+  text-align:center;
+  font-size:22px;
+  font-weight:900;
+  margin:6px 0 18px;
+}
+
+.sub-title{
+  text-align:center;
+  font-size:16px;
+  font-weight:900;
+  margin:8px 0 12px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.form-span-2{grid-column:span 2;}
+
+.section-divider{
+  height:1px;
+  background:rgba(15,23,42,0.10);
+  margin:18px 0;
+}
+
+.form-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  margin-top:18px;
+}
+
+@media(max-width:860px){
+  .form-grid{grid-template-columns:1fr;}
+  .form-span-2{grid-column:span 1;}
+}
+
+@media(max-width:700px){
+  .form-group{
+    flex-direction:column;
+    align-items:stretch;
+    gap:6px;
+  }
+  .form-group > label{
+    flex:0 0 auto;
+    text-align:left;
+    padding-right:0;
+    margin:6px 0 0;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .form-group .readonly-box{
+    max-width:100%;
+    width:100% !important;
+  }
+}
