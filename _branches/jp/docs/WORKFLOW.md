@@ -332,3 +332,52 @@ git push origin vYYYY.MM.DD
 
 **Version**: `0118_v4` (2026-01-18)
 **Last Updated**: 2026-01-18
+
+
+---
+
+#  운영 절차 (1페이지 실행 가이드)
+
+##  개요
+
+JP 버전의 배포 및 운영 절차를 1페이지로 요약한 실행 가이드입니다.
+This guide is designed for developers, QA, and deployment staff to proceed quickly and accurately in their respective roles.
+
+---
+
+## 1 개발자 (Developer)
+
+### 작업 시작
+\\\ash
+git checkout -b feature/기능-설명 dev
+\\\`n
+### 개발 & 커밋
+\\\ash
+git add .
+git commit -m 'feat(jp): 기능 설명'
+\\\`n
+### PR 생성
+\\\ash
+git push -u origin feature/기능-설명
+\\\`n
+---
+
+## 2 리뷰어 (Reviewer)
+
+GitHub에서 코드 리뷰 후 'Approve' 및 'Squash and merge' 클릭
+
+---
+
+## 3 QA (회귀 테스트)
+
+체크리스트 수행 후 배포 준비 완료
+
+---
+
+## 4 배포 담당자 (DevOps/Ops)
+
+배포 매니페스트 검증 후 배포 실행
+
+---
+
+**Version**: 0118_ops_v1 (2026-01-18)
