@@ -193,7 +193,7 @@ if (!isset($content_file) && !$is_country_page) {
   <div class="header-right">
     <?php if (empty($is_country_page)): ?>
 <div class="lang-dd" id="langDd">
-  <?php $current_lang = ($lang ?? ($_GET['lang'] ?? 'ko')); ?>
+  <?php $current_lang = ($lang ?? ($_GET['lang'] ?? 'ja')); ?>
   <button type="button" class="lang-dd-btn" onclick="toggleLangDd(event)">
     🌐 <span><?= $current_lang === 'ja' ? t('lang.ja') : ($current_lang === 'en' ? t('lang.en') : t('lang.ko')) ?></span>
     <span style="opacity:.8;">▾</span>
