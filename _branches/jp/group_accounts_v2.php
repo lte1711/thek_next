@@ -169,7 +169,7 @@ $level_names = [
     'master' => t('role.master','Master'),
     'agent' => t('role.agent','Agent'),
     'investor' => t('role.investor','Investor'),
-    'referrer' => '추천자',
+    'referrer' => t('role.referrer','Referrer'),
 ];
 
 $next_level = [
@@ -441,7 +441,7 @@ $sql = "
     }
 }
 
-$page_title   = "조직 정산 ver2";
+$page_title   = t('title.group_settlement_v2', 'Group Settlement v2');
 $page_css     = "group_accounts.css";
 $content_file = __DIR__ . "/group_accounts_v2_content.php";
 
