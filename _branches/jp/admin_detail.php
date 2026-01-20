@@ -30,7 +30,7 @@ if (!isset($_SESSION['user_id'])) {
 
 
 
-// GM만 접근
+// GM only access
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'gm') {
     http_response_code(403);
     exit(t('common.gm_only', 'GM access only.'));
@@ -40,21 +40,21 @@ include 'db_connect.php';
 
 $admin_id = isset($_GET['admin_id']) ? (int)$_GET['admin_id'] : 0;
 $date     = $_GET['date'] ?? null;    // YYYY-MM-DD
-$period   = $_GET['period'] ?? null;  // YYYY-MM or YEARWEEK(6) or (YYYY-MM-DD가 들어올 수도 있음)
+$period   = $_GET['period'] ?? null;  // YYYY-MM or YEARWEEK(6) or (may come as YYYY-MM-DD)
 
-// admin_id 체크
+// admin_id validation
 if ($admin_id <= 0) {
     http_response_code(400);
     exit(t('common.bad_request_admin_missing', 'Invalid request. (admin_id missing)'));
 }
 
-// ✅ period=YYYY-MM-DD → date로 흡수
+// ✅ If period=YYYY-MM-DD, treat it as date
 if (!$date && $period && preg_match('/^\d{4}-\d{2}-\d{2}$/', $period)) {
     $date = $period;
     $period = null;
 }
 
-// admin username 조회
+// Fetch admin username
 $stmt = $conn->prepare("SELECT username FROM users WHERE id = ? AND role='admin' LIMIT 1");
 $stmt->bind_param("i", $admin_id);
 $stmt->execute();
@@ -68,7 +68,7 @@ if (!$res) {
 
 $admin_name = $res['username'];
 
-// 기간 조건 구성
+// Build period condition
 $whereSql = "";
 $bindTypes = "s";
 $bindVals = [$admin_name];
@@ -87,7 +87,7 @@ if ($date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
     $title_period = $period;
 
 } elseif ($period && preg_match('/^\d{6}$/', $period)) {
-    // ✅ group_accounts.php와 동일 ISO 주차
+    // ✅ ISO week basis (same as group_accounts.php)
     $whereSql = " AND YEARWEEK(d.tx_date, 3) = ? ";
     $bindTypes .= "i";
     $bindVals[] = (int)$period;
@@ -99,9 +99,9 @@ if ($date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
 }
 
 /**
- * ✅ 핵심: 해당 admin 조직에서 발생한 GM 제외 분배 내역 전체
- * - 조건 키는 d.admin_username = (선택 admin)
- * - 각 행에 admin/master/agent/investor/referral 금액이 함께 있음
+ * ✅ Key: all distribution rows (excluding GM) under the selected admin organization
+ * - filter key: d.admin_username = (selected admin)
+ * - each row contains admin/master/agent/investor/referral amounts
  */
 $sql = "
     SELECT
@@ -136,7 +136,7 @@ if (!$stmt) {
     exit("DB Prepare Error: " . htmlspecialchars($conn->error));
 }
 
-// 가변 바인딩
+// Dynamic binding
 $refs = [];
 $refs[] = $bindTypes;
 for ($i = 0; $i < count($bindVals); $i++) $refs[] = &$bindVals[$i];
@@ -156,7 +156,7 @@ $totals = [
     'ex_gm'    => 0.0,
 ];
 
-// 역할별 수혜자 집계(누가 얼마 받았는지)
+// Aggregate by beneficiary per role (who received how much)
 $by_role = [
     'admin'    => [], // username => sum
     'master'   => [],
@@ -167,7 +167,7 @@ $by_role = [
 
 if ($detail_res) {
     while ($r = $detail_res->fetch_assoc()) {
-        // 금액 float 변환
+        // Convert amounts to float
         $a  = (float)$r['admin_amount'];
         $m  = (float)$r['mastr_amount'];
         $ag = (float)$r['agent_amount'];
@@ -182,7 +182,7 @@ if ($detail_res) {
 
         $rows[] = $r;
 
-        // 총합
+        // Totals
         $totals['admin']    += $a;
         $totals['master']   += $m;
         $totals['agent']    += $ag;
@@ -190,7 +190,7 @@ if ($detail_res) {
         $totals['referral'] += $rf;
         $totals['ex_gm']     += ($a + $m + $ag + $iv + $rf);
 
-        // 역할별 수혜자별 합산
+        // Sum per beneficiary by role
         if (!empty($r['admin_username']))    $by_role['admin'][$r['admin_username']]       = ($by_role['admin'][$r['admin_username']] ?? 0) + $a;
         if (!empty($r['mastr_username']))    $by_role['master'][$r['mastr_username']]      = ($by_role['master'][$r['mastr_username']] ?? 0) + $m;
         if (!empty($r['agent_username']))    $by_role['agent'][$r['agent_username']]       = ($by_role['agent'][$r['agent_username']] ?? 0) + $ag;
@@ -199,7 +199,7 @@ if ($detail_res) {
     }
 }
 
-// 내림차순 정렬(많이 받은 순)
+// Sort descending (highest first)
 foreach ($by_role as $k => $arr) {
     arsort($arr);
     $by_role[$k] = $arr;
@@ -207,14 +207,14 @@ foreach ($by_role as $k => $arr) {
 
 
 // =====================
-// CSV Download (권한별 정산내역)
+// CSV Download (settlement details by role)
 // =====================
 if (isset($_GET['download']) && $_GET['download'] == '1') {
 
     
-    // ✅ 다운로드에서 investor(투자자) 라인 제외 (화면과 동일)
+    // ✅ Exclude investor lines in download (same as UI)
     if (isset($by_role['investor'])) { unset($by_role['investor']); }
-// user_details 컬럼 존재 여부 체크 (환경마다 컬럼명이 달라질 수 있음)
+// Check user_details columns (column names may differ by environment)
     $cols = [];
     $colRes = $conn->query("SHOW COLUMNS FROM user_details");
     while ($c = $colRes->fetch_assoc()) {
@@ -226,7 +226,7 @@ if (isset($_GET['download']) && $_GET['download'] == '1') {
     }
     $codepay_col = isset($cols['codepay_address']) ? 'codepay_address' : (isset($cols['codepay']) ? 'codepay' : null);
 
-    // username 목록 수집
+    // Collect usernames
     $all_usernames = [];
     foreach ($by_role as $role => $arr) {
         
@@ -237,7 +237,7 @@ foreach (array_keys($arr) as $un) {
     }
     $all_usernames = array_keys($all_usernames);
 
-    // 상세정보 조회
+    // Fetch details
     $details = []; // username => [id, wallet, codepay]
     if (count($all_usernames) > 0) {
         $placeholders = implode(',', array_fill(0, count($all_usernames), '?'));
@@ -263,12 +263,12 @@ foreach (array_keys($arr) as $un) {
         $stmt->close();
     }
 
-    // CSV 출력
+    // Output CSV
     header('Content-Type: text/csv; charset=UTF-8');
     $fname = "admin_detail_{$admin_name}_" . ($title_period ?: date('Y-m-d')) . ".csv";
     header('Content-Disposition: attachment; filename="'.$fname.'"');
 
-    // UTF-8 BOM (엑셀 호환)
+    // UTF-8 BOM (Excel compatible)
     echo "\xEF\xBB\xBF";
 
     $out = fopen('php://output', 'w');

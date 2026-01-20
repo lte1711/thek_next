@@ -17,7 +17,9 @@ ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once __DIR__ . '/includes/i18n.php';
+if (!defined('I18N_LOADED')) {
+    require_once __DIR__ . '/includes/i18n.php';
+}
 // role 값 확인
 if (!isset($_SESSION['role'])) {
     error_log(t('error.login_required', 'Login required.'));
@@ -99,6 +101,16 @@ if (!isset($content_file) && !$is_country_page) {
     <link rel="stylesheet" href="css/forms.css">
     <!-- Date picker (flatpickr) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <?php if (isset($is_country_page) && $is_country_page): ?>
+    <!-- Country Accordion Menu CSS (with cache-busting version) -->
+    <link rel="stylesheet" href="css/pages/country_menu.css?v=<?= filemtime(__DIR__ . '/css/pages/country_menu.css') ?>">
+    <!-- Country Common Styles -->
+    <link rel="stylesheet" href="css/pages/country_common.css?v=<?= filemtime(__DIR__ . '/css/pages/country_common.css') ?>">
+    <!-- Country Filter Bar Styles -->
+    <link rel="stylesheet" href="css/pages/country_filterbar.css?v=<?= filemtime(__DIR__ . '/css/pages/country_filterbar.css') ?>">
+    <!-- Country Table Styles -->
+    <link rel="stylesheet" href="css/pages/country_table.css?v=<?= filemtime(__DIR__ . '/css/pages/country_table.css') ?>">
+    <?php endif; ?>
     <style>
         /* JP standard: compact inline date input */
         input.date-picker{width:170px; padding:8px; border-radius:8px; border:1px solid #d6dbe3;}
@@ -193,7 +205,7 @@ if (!isset($content_file) && !$is_country_page) {
   <div class="header-right">
     <?php if (empty($is_country_page)): ?>
 <div class="lang-dd" id="langDd">
-  <?php $current_lang = ($lang ?? ($_GET['lang'] ?? 'ko')); ?>
+  <?php $current_lang = ($lang ?? ($_GET['lang'] ?? 'ja')); ?>
   <button type="button" class="lang-dd-btn" onclick="toggleLangDd(event)">
     🌐 <span><?= $current_lang === 'ja' ? t('lang.ja') : ($current_lang === 'en' ? t('lang.en') : t('lang.ko')) ?></span>
     <span style="opacity:.8;">▾</span>
@@ -233,54 +245,55 @@ document.addEventListener('keydown', function(e){
         <nav class="menu-sidebar" id="sidebar">
             <?php if ($is_country_page): ?>
                 <?php
+                    // Country definitions (extensible)
+                    $countries = [
+                        'korea' => 'KOREA',
+                        'japan' => 'JAPAN',
+                        // Future additions:
+                        // 'malaysia' => 'MALAYSIA',
+                        // 'vietnam'  => 'VIETNAM',
+                    ];
+
+                    // Submenu definitions
+                    $submenus = [
+                        ['file' => 'country_ready.php',        'label' => 'Ready'],
+                        ['file' => 'country_progressing.php',  'label' => 'Progressing'],
+                        ['file' => 'country_completed.php',    'label' => 'C / L'],
+                        ['file' => 'country_profit_share.php', 'label' => 'P / S'],
+                    ];
+
+                    // Region validation (whitelist)
                     $region = $_GET['region'] ?? 'korea';
+                    $region = array_key_exists($region, $countries) ? $region : 'korea';
+                    
                     $current_page = basename($_SERVER['PHP_SELF']);
-                    $is_active = fn(string $p) => ($current_page === $p) ? 'active' : '';
+                    $is_active = fn(string $page, string $target_region) => 
+                        ($current_page === $page && $region === $target_region) ? 'active' : '';
                 ?>
 
-                <!-- ✅ 국가 선택 메뉴 (한국만 남김) -->
-                <ul class="menu-list">
-                    <li><a class="btn <?= $is_active('country_ready.php') ?>" href="country_ready.php?region=<?= htmlspecialchars($region) ?>"><?= t('menu.country.korea', 'KOREA') ?></a></li>
+                <!-- Pass country regions to JavaScript -->
+                <script>window.COUNTRY_REGIONS = <?= json_encode(array_keys($countries)) ?>;</script>
 
-                    <!-- ✅ Korea 하위 메뉴 (KOREA ~ Logout 사이) -->
-	                    <li>
-	                        <a class="country-submenu <?= $is_active('country_ready.php') ?>" href="country_ready.php?region=<?= htmlspecialchars($region) ?>"><?= t('menu.country.ready', 'Ready') ?></a>
-	                    </li>
-	                    <li>
-	                        <a class="country-submenu <?= $is_active('country_progressing.php') ?>" href="country_progressing.php?region=<?= htmlspecialchars($region) ?>"><?= t('menu.country.progressing', 'Progressing') ?></a>
-	                    </li>
-	                    <li>
-	                        <a class="country-submenu <?= $is_active('country_completed.php') ?>" href="country_completed.php?region=<?= htmlspecialchars($region) ?>"><?= t('menu.country.completed', 'C / L') ?></a>
-	                    </li>
-	                    <li>
-	                        <a class="country-submenu <?= $is_active('country_profit_share.php') ?>" href="country_profit_share.php?region=<?= htmlspecialchars($region) ?>"><?= t('menu.country.ps', 'P / S') ?></a>
-	                    </li>
+                <!-- Country Accordion Menu -->
+                <ul class="menu-list">
+                    <?php foreach ($countries as $code => $label): ?>
+                    <li>
+                        <div class="country-header" onclick="toggleCountry('<?= htmlspecialchars($code) ?>')">
+                            <span id="icon-<?= htmlspecialchars($code) ?>"><?= $region === $code ? '▼' : '▶' ?></span> <?= htmlspecialchars($label) ?>
+                        </div>
+                        <ul class="country-submenu-list <?= $region === $code ? 'open' : '' ?>" id="submenu-<?= htmlspecialchars($code) ?>">
+                            <?php foreach ($submenus as $menu): ?>
+                            <li><a class="country-submenu <?= $is_active($menu['file'], $code) ?>" 
+                                   href="<?= htmlspecialchars($menu['file']) ?>?region=<?= htmlspecialchars($code) ?>"><?= htmlspecialchars($menu['label']) ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                    <?php endforeach; ?>
                 </ul>
 
-	                <!-- ✅ Korea 하위 메뉴는 "파란 버튼" 없이 글자(텍스트) 버튼 형태로 표시 -->
-	                <style>
-	                    .menu-sidebar .country-submenu {
-	                        display: block;
-	                        padding: 8px 12px 8px 22px; /* 들여쓰기 */
-	                        background: none !important;
-	                        border: none !important;
-	                        color: inherit;
-	                        text-decoration: none;
-	                        font-size: 14px;
-	                        line-height: 1.2;
-	                    }
-	                    .menu-sidebar .country-submenu:hover {
-	                        text-decoration: underline;
-	                    }
-	                    .menu-sidebar .country-submenu.active {
-	                        font-weight: 700;
-	                        text-decoration: underline;
-	                    }
-	                </style>
-
-                <!-- ✅ 로그아웃 버튼 추가 -->
+                <!-- Logout Button -->
                 <div class="logout-box">
-                    <a href="logout.php" class="logout-btn"><?= t('menu.logout', 'Logout') ?></a>
+                    <a href="logout.php" class="logout-btn">Logout</a>
                 </div>
 
 
@@ -371,14 +384,35 @@ document.addEventListener('keydown', function(e){
           document.querySelectorAll('input.date-picker').forEach(function(el){
             // Avoid double-init
             if (el._flatpickr) return;
+            
+            // Check if this is a country filter date input
+            const isCountryFilter = el.classList.contains('country-filter-date');
+            
+            // Force English locale for country filter bar
             let localeObj = null;
-            if (APP_LANG === 'ko' && flatpickr.l10ns && flatpickr.l10ns.ko) localeObj = flatpickr.l10ns.ko;
-            else if (APP_LANG === 'ja' && flatpickr.l10ns && flatpickr.l10ns.ja) localeObj = flatpickr.l10ns.ja;
-            // en -> default
+            if (!isCountryFilter) {
+              // Use language-specific locale for non-country pages
+              if (APP_LANG === 'ko' && flatpickr.l10ns && flatpickr.l10ns.ko) localeObj = flatpickr.l10ns.ko;
+              else if (APP_LANG === 'ja' && flatpickr.l10ns && flatpickr.l10ns.ja) localeObj = flatpickr.l10ns.ja;
+            }
+            // Country filter bar always uses English (default)
+            
             flatpickr(el, {
               dateFormat: "Y-m-d",
               allowInput: true,
-              locale: localeObj || "default"
+              locale: localeObj || "default",
+              onOpen: function(selectedDates, dateStr, instance) {
+                // Add scope class to country filter calendars
+                if (isCountryFilter) {
+                  instance.calendarContainer.classList.add('country-filter-fp');
+                }
+              },
+              onClose: function(selectedDates, dateStr, instance) {
+                // Optional: remove scope class on close
+                if (isCountryFilter) {
+                  instance.calendarContainer.classList.remove('country-filter-fp');
+                }
+              }
             });
           });
         }
@@ -390,5 +424,9 @@ document.addEventListener('keydown', function(e){
             document.getElementById('sidebar').classList.toggle('active');
         }
     </script>
+    <?php if (isset($is_country_page) && $is_country_page): ?>
+    <!-- Country Accordion Menu JS -->
+    <script src="js/pages/country_menu.js"></script>
+    <?php endif; ?>
 </body>
 </html>

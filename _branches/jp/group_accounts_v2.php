@@ -28,6 +28,13 @@ if (!function_exists('t')) {
     if (file_exists($i18n)) require_once $i18n;
 }
 
+// DEBUG: Language context check
+echo "<div style='padding:6px 10px;background:#ffeeaa;border:1px solid #ccaa00;margin:10px 0;'>
+DEBUG LANG: GET=" . htmlspecialchars($_GET['lang'] ?? 'NULL') .
+" / SESSION=" . htmlspecialchars($_SESSION['lang'] ?? 'NULL') .
+" / CURRENT=" . htmlspecialchars($lang ?? 'NULL') .
+"</div>";
+
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -169,7 +176,7 @@ $level_names = [
     'master' => t('role.master','Master'),
     'agent' => t('role.agent','Agent'),
     'investor' => t('role.investor','Investor'),
-    'referrer' => '추천자',
+    'referrer' => t('role.referrer','Referrer'),
 ];
 
 $next_level = [
@@ -441,7 +448,7 @@ $sql = "
     }
 }
 
-$page_title   = "조직 정산 ver2";
+$page_title   = t('title.group_settlement_v2', 'Group Settlement v2');
 $page_css     = "group_accounts.css";
 $content_file = __DIR__ . "/group_accounts_v2_content.php";
 

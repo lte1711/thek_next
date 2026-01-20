@@ -51,7 +51,8 @@ $ready_id = (int)($_POST['ready_id'] ?? 0); // optional
 $tx_id    = (int)($_POST['tx_id'] ?? 0);    // required (or resolvable via ready_id)
 $reason   = trim($_POST['reason'] ?? '');
 $region   = $_POST['region'] ?? 'korea';
-if ($region !== 'korea') $region = 'korea';
+$allowed_regions = ['korea', 'japan'];
+if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
 $table_ready    = $region . "_ready_trading";
 $table_progress = $region . "_progressing";
@@ -133,6 +134,7 @@ try {
     // -------------------------------------------------
     $sql2 = "UPDATE user_transactions
                 SET settle_chk=2,
+                    external_done_chk=0,
                     reject_reason=?,
                     reject_by=?,
                     reject_date=NOW()
@@ -189,7 +191,6 @@ try {
                     user_id=VALUES(user_id),
                     tx_date=VALUES(tx_date),
                     pair=VALUES(pair),
-                    deposit_status=VALUES(deposit_status),
                     withdrawal_status=VALUES(withdrawal_status),
                     profit_loss=VALUES(profit_loss),
                     notes=VALUES(notes),

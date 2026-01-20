@@ -62,7 +62,8 @@ endif;
       $withdrawal = $row['withdrawal_chk'] ?? 0;
       $dividend   = $row['dividend_chk'];
       $settled    = $row['settle_chk'];
-      $reject     = $row['reject_reason'];
+      $reject     = $row['reject_reason'] ?? null;
+      $reject_by  = $row['reject_by'] ?? null;
 
       $all_three = ($deposit == 1 && $external == 1 && $withdrawal == 1 && $dividend == 1);
       $all_four  = ($all_three && $settled == 1);
@@ -95,11 +96,15 @@ endif;
       <td><?= ($withdrawal == 1) ? '<span class="check">✅</span>' : ((int)$external===1 ? '<a href="investor_withdrawal.php?user_id='.$user_id.'&id='.$row['id'].'" class="fail">❌</a>' : '<span class="muted">⏳</span>') ?></td>
       <td><?= ($dividend == 1) ? '<span class="check">✅</span>' : ((int)$external===1 ? '<a href="investor_profit_share.php?user_id='.$user_id.'&id='.$row['id'].'" class="fail">❌</a>' : '<span class="muted">⏳</span>') ?></td>
       <td>
-        <?php if ($reject): ?>
-          <button class="confirm-btn" onclick="alert(<?= json_encode(t('label.reject_reason','Reject reason: ')) ?> + <?= json_encode($reject) ?>)"><?= t('btn.view_reject_reason','View reason') ?></button>
+        <!-- DEBUG: id=<?= $row['id'] ?>, reject='<?= htmlspecialchars($reject ?? 'NULL') ?>', reject_by='<?= htmlspecialchars($reject_by ?? 'NULL') ?>', empty(reject)=<?= empty($reject) ? 'true' : 'false' ?>, empty(reject_by)=<?= empty($reject_by) ? 'true' : 'false' ?> -->
+        <?php if (!empty($reject) || !empty($reject_by)): ?>
+          <?php
+            $reject_msg = t('label.reject_reason','거절 사유: ') . (!empty($reject) ? $reject : '(사유 없음)');
+          ?>
+          <button class="confirm-btn" onclick='alert(<?= json_encode($reject_msg, JSON_UNESCAPED_UNICODE) ?>)'><?= t('btn.view_reject_reason','거절 사유 보기') ?></button>
 
           <!-- ✅ 却下中 해제: 최소 초기화만 수행 (settle_chk=0, reject_* NULL) → 이후 사용자가 다시 ON 진행 -->
-          <form method="POST" action="reject_reset.php" style="display:inline; margin-left:6px;" onsubmit="return confirm(<?= json_encode(t('profit_share.confirm.reject_reset')) ?>);">
+          <form method="POST" action="reject_reset.php" style="display:inline; margin-left:6px;" onsubmit='return confirm(<?= json_encode(t("profit_share.confirm.reject_reset"), JSON_UNESCAPED_UNICODE) ?>)'>
             <input type="hidden" name="id" value="<?= (int)$row['id'] ?>">
             <input type="hidden" name="user_id" value="<?= (int)$user_id ?>">
             <input type="hidden" name="region" value="<?= htmlspecialchars($region ?? 'korea') ?>">

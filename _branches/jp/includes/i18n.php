@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1) lang 결정: GET > SESSION > default(ko)
+// 1) lang 결정: GET > SESSION > default(ja)
 if (isset($_GET['lang'])) {
     $lang = strtolower(trim($_GET['lang']));
     if (in_array($lang, ['ko', 'ja', 'en'], true)) {
@@ -12,7 +12,7 @@ if (isset($_GET['lang'])) {
     }
 }
 // 전역 변수 $lang 초기화 (null 방지)
-$lang = $_SESSION['lang'] ?? 'ko';
+$lang = $_SESSION['lang'] ?? 'ja';
 
 // global $lang 선언으로 모든 함수에서 접근 가능하도록 보장
 if (!isset($GLOBALS['lang'])) {
@@ -49,5 +49,5 @@ function t(string $key, ?string $fallback = null): string
 function current_lang(): string
 {
     global $lang;
-    return $lang ?? 'ko'; // null 방지: 기본값 'ko' 반환
+    return $lang ?? 'ja'; // null 방지: 기본값 'ja' 반환
 }

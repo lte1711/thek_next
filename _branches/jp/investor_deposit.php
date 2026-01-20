@@ -108,9 +108,86 @@ function isFirstTrade(mysqli $conn, int $user_id): bool {
 // POST 저장 처리
 // - ✅ 자동 체크/초기화 없음 (합의사항)
 // - ✅ 신규 입금은 항상 새 레코드 INSERT만 수행
+// - ✅ Reject 모드: 입금액만 UPDATE
 // ==============================
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['xm_value'])) {
 
+    // ✅ Reject 모드: 입금액만 UPDATE
+    if (isset($_POST['reject_update_mode']) && $_POST['reject_update_mode'] === '1') {
+        $tx_id_to_update = (int)($_POST['tx_id'] ?? 0);
+        $xm_value     = (float)($_POST['xm_value'] ?? 0);
+        $ultima_value = (float)($_POST['ultima_value'] ?? 0);
+
+        if ($tx_id_to_update <= 0 || ($xm_value <= 0 && $ultima_value <= 0)) {
+            die(t('err.invalid_reject_update', 'Invalid reject update parameters'));
+        }
+
+        // 보안: 해당 거래가 현재 사용자 소유이며 Reject 상태인지 재확인
+        $sql_verify = "
+            SELECT id FROM user_transactions
+            WHERE id = ?
+              AND user_id = ?
+              AND deposit_chk = 1
+              AND reject_by IS NOT NULL
+              AND COALESCE(external_done_chk, 0) = 0
+              AND settle_chk != 1
+              AND dividend_chk != 1
+            LIMIT 1
+        ";
+        $stmtV = $conn->prepare($sql_verify);
+        if (!$stmtV) die(t('msg.db_error', 'Database error'));
+        $stmtV->bind_param("ii", $tx_id_to_update, $user_id);
+        $stmtV->execute();
+        $resV = $stmtV->get_result();
+        if (!$resV || $resV->num_rows === 0) {
+            $stmtV->close();
+            die(t('err.invalid_reject_transaction', 'Invalid reject transaction'));
+        }
+        $stmtV->close();
+
+        // UPDATE: 입금액만 수정
+        $sql_update = "
+            UPDATE user_transactions
+            SET xm_value = ?,
+                ultima_value = ?
+            WHERE id = ? AND user_id = ?
+        ";
+        $stmtU = $conn->prepare($sql_update);
+        if (!$stmtU) die(t('msg.update_prepare_fail', 'Update prepare failed'));
+        $stmtU->bind_param("ddii", $xm_value, $ultima_value, $tx_id_to_update, $user_id);
+        if (!$stmtU->execute()) {
+            $stmtU->close();
+            die(t('msg.update_fail', 'Update failed'));
+        }
+        $stmtU->close();
+
+        // korea_progressing도 deposit_status 업데이트
+        $deposit_total = $xm_value + $ultima_value;
+        $profit_loss = -1 * $deposit_total;
+        $sql_kp_update = "
+            UPDATE korea_progressing
+            SET deposit_status = ?,
+                profit_loss = ?
+            WHERE user_id = ?
+              AND tx_id = ?
+        ";
+        $stmtKP = $conn->prepare($sql_kp_update);
+        if ($stmtKP) {
+            $stmtKP->bind_param("ddii", $deposit_total, $profit_loss, $user_id, $tx_id_to_update);
+            $stmtKP->execute();
+            $stmtKP->close();
+        }
+
+        $conn->close();
+        $redirect = "investor_deposit.php";
+        if ($is_privileged) {
+            $redirect .= "?user_id=" . urlencode((string)$user_id);
+        }
+        header("Location: " . $redirect);
+        exit;
+    }
+
+    // 기존 INSERT 로직 (신규 입금)
     $selected_date = $_POST['tx_date'] ?? $today;
     $xm_value     = (float)($_POST['xm_value'] ?? 0);
     $ultima_value = (float)($_POST['ultima_value'] ?? 0);
@@ -225,6 +302,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['xm_value'])) {
 }
 
 // 여기까지 오면 GET 화면 렌더
+
+// ==============================
+// ✅ Reject 거래 확인 (입금액만 수정 모드)
+// ==============================
+$reject_mode = false;
+$reject_tx = null;
+
+$sql_reject = "
+    SELECT id, tx_date, xm_value, ultima_value, reject_reason, reject_by, settle_chk, dividend_chk
+    FROM user_transactions
+    WHERE user_id = ?
+      AND deposit_chk = 1
+      AND reject_by IS NOT NULL
+      AND COALESCE(external_done_chk, 0) = 0
+      AND settle_chk != 1
+      AND dividend_chk != 1
+    ORDER BY id DESC
+    LIMIT 1
+";
+$stmtR = $conn->prepare($sql_reject);
+if ($stmtR) {
+    $stmtR->bind_param("i", $user_id);
+    $stmtR->execute();
+    $resR = $stmtR->get_result();
+    $rowR = $resR ? $resR->fetch_assoc() : null;
+    $stmtR->close();
+    
+    if ($rowR) {
+        $reject_mode = true;
+        $reject_tx = $rowR;
+    }
+}
 
 // ==============================
 // ✅ 입금 불가 상태 판단 + 표시용 거래 정보 (레이아웃 유지)

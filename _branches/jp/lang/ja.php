@@ -874,6 +874,9 @@ return [
     'role.admin' => '管理者',
     'role.gm' => 'GM',
     'role.master' => 'マスター',
+    'role.agent' => 'エージェント',
+    'role.investor' => '投資家',
+    'role.referrer' => '紹介者',
     'title.create_account_2step' => 'Title create account 2step',
 
 

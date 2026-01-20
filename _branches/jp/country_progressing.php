@@ -1,20 +1,18 @@
 <?php
 session_start();
 
-// Safe initialization
+// Force English only - no i18n
 if (!function_exists('t')) {
-    $i18n_path = __DIR__ . '/includes/i18n.php';
-    if (file_exists($i18n_path)) {
-        require_once $i18n_path;
-    } else {
-        function t($key, $fallback = null) {
-            return $fallback ?? $key;
-        }
-        function current_lang() {
-            return 'ko';
-        }
+    function t($key, $fallback = null) {
+        return $fallback ?? $key;
+    }
+    function current_lang() {
+        return 'en';
     }
 }
+
+// Prevent layout.php from loading i18n again
+define('I18N_LOADED', true);
 
 // Basic authentication check
 if (!isset($_SESSION['user_id'])) {
@@ -38,9 +36,11 @@ if (!($username === 'Zayne' || $role === 'superadmin')) {
 include 'db_connect.php';
 
 $region = $_GET['region'] ?? 'korea';
-if ($region !== 'korea') $region = 'korea';
+$allowed_regions = ['korea', 'japan'];
+if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
 $table_progress = $region . "_progressing";
+$table_ready = $region . "_ready_trading";
 
 // ✅ 자동 동기화 (Ready → Progressing 행 생성) : 기존 로직 유지
 $sync_sql = "
@@ -59,6 +59,7 @@ $sync_sql = "
     t.settled_date,
     t.reject_reason
   FROM user_transactions t
+  INNER JOIN {$table_ready} r ON r.tx_id = t.id AND r.user_id = t.user_id
   WHERE COALESCE(t.withdrawal_chk,0) = 0
         AND NOT EXISTS (
       SELECT 1
@@ -74,9 +75,57 @@ if (!$sync_res) {
     error_log("country_progressing.php Sync INSERT Error: " . mysqli_error($conn));
 }
 
-$progress_per_page = 50;
-$progress_page = isset($_GET['progress_page']) ? max(1, (int)$_GET['progress_page']) : 1;
-$progress_offset = ($progress_page - 1) * $progress_per_page;
+// ✅ 페이지네이션 변수 통일 (20개 단위)
+$per_page = 20;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $per_page;
+
+// ✅ base_query: 필터 파라미터 유지
+$qs = [];
+$qs['region'] = $region;
+if (!empty($_GET['from'])) $qs['from'] = $_GET['from'];
+if (!empty($_GET['to'])) $qs['to'] = $_GET['to'];
+if (!empty($_GET['q'])) $qs['q'] = $_GET['q'];
+$base_query = http_build_query($qs);
+
+// ✅ COUNT 쿼리
+$sql_count = "
+  SELECT COUNT(*) AS cnt
+  FROM {$table_progress} p
+  JOIN users u ON u.id = p.user_id
+  LEFT JOIN (
+    SELECT user_id, DATE(tx_date) AS tx_date, MAX(id) AS max_id
+    FROM user_transactions
+    GROUP BY user_id, DATE(tx_date)
+  ) m ON m.user_id = p.user_id AND m.tx_date = p.tx_date
+  LEFT JOIN user_transactions t ON t.id = m.max_id
+  WHERE NOT (
+    (
+      COALESCE(t.deposit_chk,0) = 1
+      AND COALESCE(t.withdrawal_chk,0) = 1
+      AND COALESCE(t.settle_chk,0) = 1
+      AND COALESCE(t.dividend_chk,0) = 1
+    )
+    OR (
+      COALESCE(p.deposit_status,'') = 'V'
+      AND COALESCE(p.withdrawal_status,'') = 'V'
+      AND COALESCE(p.profit_loss,'') = 'V'
+    )
+  )
+  AND COALESCE(t.settle_chk,0) <> 2
+";
+
+$total_count = 0;
+$total_pages = 1;
+$res_cnt = mysqli_query($conn, $sql_count);
+if ($res_cnt) {
+    $row_cnt = mysqli_fetch_assoc($res_cnt);
+    $total_count = (int)($row_cnt['cnt'] ?? 0);
+}
+$total_pages = max(1, (int)ceil($total_count / $per_page));
+if ($page > $total_pages) $page = $total_pages;
+$offset = ($page - 1) * $per_page;
 
 $sql_progress = "
   SELECT
@@ -119,7 +168,7 @@ $sql_progress = "
     AND COALESCE(t.settle_chk,0) <> 2
 
   ORDER BY p.tx_date DESC
-  LIMIT {$progress_per_page} OFFSET {$progress_offset}
+  LIMIT {$per_page} OFFSET {$offset}
 ";
 
 $result_progress = mysqli_query($conn, $sql_progress);

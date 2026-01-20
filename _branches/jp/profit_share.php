@@ -46,7 +46,7 @@ if (!$user_id) {
 
 // region (기본 korea)
 $region = $_GET['region'] ?? 'korea';
-$allowed_regions = ['korea']; // 필요 시 추가
+$allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) {
     http_response_code(400);
     die('invalid region');
@@ -68,7 +68,7 @@ if ($year_month && preg_match('/^\d{4}-\d{2}$/', $year_month)) {
 // 거래 내역 조회 (월별 필터링, 개별 id 포함) + 오늘 몇 번째(day_seq) 표시용 ready_trading 조인
 $sql = "SELECT 
             t.id, t.tx_date, t.deposit_chk, t.external_done_chk, t.external_done_date, t.withdrawal_chk, t.dividend_chk, t.settle_chk,
-            t.reject_reason, t.settled_by, t.settled_date,
+            t.reject_reason, t.reject_by, t.settled_by, t.settled_date,
             r.day_seq, r.created_date
         FROM user_transactions t
         LEFT JOIN (

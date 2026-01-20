@@ -138,7 +138,7 @@ $nl_kor = $nl ? ($level_names[$nl] ?? $nl) : '';
       </table>
 
       <div style="margin-top:10px; font-size:12px; color:#666;">
-        선택: <strong><?=h($date)?></strong>
+        <?= t('label.selected', '選択') ?>: <strong><?=h($date)?></strong>
         <?php if (!empty($is_settled)): ?>
           <span style="margin-left:6px; color:#666;">(<?= t('status.settled','Settled') ?>)</span>
         <?php else: ?>
@@ -153,14 +153,14 @@ $nl_kor = $nl ? ($level_names[$nl] ?? $nl) : '';
       <div class="v2-sub"><?= t('desc.group_settlement_v2','Roll-down (All/Selected) + mini calendar + gray completed days') ?></div>
 
       <div class="breadcrumb">
-        현재 위치: <strong><?= h($path !== '' ? $path : 'admin 전체') ?></strong>
+        <?= t('label.current_location', '現在位置') ?>: <strong><?= h($path !== '' ? $path : t('label.all_admin', '全管理者')) ?></strong>
       </div>
 
       <div class="state-row">
         <div class="pill">level: <strong><?=h($level)?></strong></div>
         <div class="pill">target: <strong><?=h($target !== '' ? $target : '-')?></strong></div>
         <div class="pill <?= !empty($is_settled) ? 'settled' : '' ?>">
-          상태: <strong><?= !empty($is_settled) ? '정산 완료' : '미정산' ?></strong>
+          <?= t('label.status', 'ステータス') ?>: <strong><?= !empty($is_settled) ? t('status.settled', '精算完了') : t('status.unsettled', '未精算') ?></strong>
         </div>
 
         <?php if (isset($progress) && ($view === 'all')): ?>
@@ -179,7 +179,7 @@ $nl_kor = $nl ? ($level_names[$nl] ?? $nl) : '';
       <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <div style="flex:1; min-width:240px;">
           <label style="display:block; font-size:12px; color:#666; margin-bottom:6px;">
-            <?= q($level_kor) ?> 선택
+            <?= q($level_kor) ?> <?= t('action.select', '選択') ?>
           </label>
 
           <?php
