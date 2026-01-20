@@ -57,20 +57,26 @@
     width: 165px !important;
 }
 
-/* Fix flatpickr calendar positioning and z-index (scoped to country filterbar only) */
-.country-filterbar + .flatpickr-calendar,
-.flatpickr-calendar.country-filter-picker {
+/* Fix flatpickr calendar positioning and z-index */
+/* Note: flatpickr calendar is appended to body, so we need global selectors */
+.flatpickr-calendar {
     z-index: 9999 !important;
 }
 
-.country-filterbar + .flatpickr-calendar .flatpickr-months,
-.flatpickr-calendar.country-filter-picker .flatpickr-months {
+/* Ensure month/year header is not clipped */
+.flatpickr-calendar .flatpickr-months {
     overflow: visible !important;
 }
 
-.country-filterbar + .flatpickr-calendar .flatpickr-month,
-.flatpickr-calendar.country-filter-picker .flatpickr-month {
+.flatpickr-calendar .flatpickr-month {
     overflow: visible !important;
+    height: auto !important;
+    min-height: 28px !important;
+}
+
+.flatpickr-calendar .flatpickr-current-month {
+    overflow: visible !important;
+    padding-top: 4px !important;
 }
 
 /* Search input */
