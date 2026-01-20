@@ -4,7 +4,6 @@
  * 
  * Required variables:
  * - $region: current region (korea|japan)
- * - $current_page: current PHP file name (e.g., 'country_ready.php')
  * 
  * Optional variables:
  * - $from_date: default from date (YYYY-MM-DD)
@@ -12,6 +11,7 @@
  * - $search_query: default search query
  * - $is_export_enabled: whether export button is enabled (default: false)
  * - $search_placeholder: placeholder text for search input (default: 'Username / Pair / Note')
+ * - $export_onclick: JavaScript function to call for export (e.g., 'exportData()')
  */
 
 // Set defaults
@@ -20,7 +20,11 @@ $to_date = $to_date ?? '';
 $search_query = $search_query ?? '';
 $is_export_enabled = $is_export_enabled ?? false;
 $search_placeholder = $search_placeholder ?? 'Username / Pair / Note';
-$current_page = $current_page ?? basename($_SERVER['PHP_SELF']);
+$export_onclick = $export_onclick ?? 'exportData()';
+
+// Get current page for reset
+$current_page = basename($_SERVER['PHP_SELF']);
+$reset_url = $current_page . '?region=' . urlencode($region);
 ?>
 
 <form method="GET" class="country-filterbar">
@@ -49,12 +53,48 @@ $current_page = $current_page ?? basename($_SERVER['PHP_SELF']);
   
   <div class="filter-right">
     <button type="submit" class="btn-filter btn-apply">Apply</button>
-    <a href="<?= htmlspecialchars($current_page) ?>?region=<?= htmlspecialchars($region) ?>" 
-       class="btn-filter btn-reset">Reset</a>
+    <a href="<?= htmlspecialchars($reset_url) ?>" class="btn-filter btn-reset">Reset</a>
     <?php if ($is_export_enabled): ?>
-      <button type="button" class="btn-filter btn-export" onclick="exportData()">Export</button>
+      <button type="button" class="btn-filter btn-export" onclick="<?= htmlspecialchars($export_onclick) ?>">Export</button>
     <?php else: ?>
       <button type="button" class="btn-filter btn-export" disabled>Export</button>
     <?php endif; ?>
   </div>
 </form>
+
+<script>
+// Initialize custom date picker for filter bar
+(function(){
+  function attach(selector, mode) {
+    document.querySelectorAll(selector).forEach(input => {
+      if (input.dataset.pickerAttached) return;
+      input.dataset.pickerAttached = 'true';
+
+      const m = mode || 'date';
+      const fmt = m === 'month' ? 'yyyy-MM' : 'yyyy-MM-dd';
+
+      function show(input, m){
+        const val = input.value || new Date().toISOString().slice(0, m === 'month' ? 7 : 10);
+        input.type = m;
+        input.value = val;
+        input.showPicker?.();
+        setTimeout(() => input.focus(), 0);
+      }
+
+      input.type = 'text';
+      input.addEventListener('focus', ()=> show(input, m));
+      input.addEventListener('click', ()=> show(input, m));
+      input.addEventListener('keydown', (e)=>{
+        if (e.key.length === 1) e.preventDefault();
+      });
+    });
+  }
+
+  // Initialize date pickers on load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ()=> attach('input.js-date', 'date'));
+  } else {
+    attach('input.js-date', 'date');
+  }
+})();
+</script>

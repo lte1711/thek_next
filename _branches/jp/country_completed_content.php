@@ -9,7 +9,6 @@ $to_date = $_GET['to'] ?? '';
 $search_query = $_GET['q'] ?? '';
 $is_export_enabled = false; // Completed page does not have export yet
 $search_placeholder = 'Username / Pair';
-$current_page = 'country_completed.php';
 ?>
 <div class="country-page-header">
   <h1 class="country-page-title"><?= $countryLabel ?> - C / L</h1>

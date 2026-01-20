@@ -8,7 +8,6 @@ $to_date = $_GET['to'] ?? $_GET['partner_date'] ?? '';
 $search_query = $_GET['q'] ?? '';
 $is_export_enabled = false; // P/S has settlement, not export
 $search_placeholder = 'Partner Name';
-$current_page = 'country_profit_share.php';
 
 // Keep partner_date for backward compatibility
 if (!empty($_GET['partner_date'])) {
