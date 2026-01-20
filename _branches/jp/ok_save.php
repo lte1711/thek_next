@@ -71,6 +71,9 @@ try {
   $tx_id   = isset($_POST['tx_id']) ? (int)$_POST['tx_id'] : 0;
   $region  = isset($_POST['region']) ? trim($_POST['region']) : 'korea';
 
+  // ✅ 디버그 로그: POST 파라미터 확인
+  error_log("[OK_SAVE] POST=" . json_encode($_POST));
+
   if ($user_id<=0 || $tx_id<=0) throw new Exception('Invalid parameters');
 
   $allowed_regions = ['korea', 'japan'];
@@ -138,7 +141,12 @@ try {
   $stmt = $conn->prepare($sql);
   $stmt->bind_param($it, ...$ip);
   $stmt->execute();
+  $affected_ready = $stmt->affected_rows;
   $stmt->close();
+
+  // ✅ 디버그 로그: ready_trading UPSERT 결과
+  error_log("[OK_SAVE] ready_trading SQL_ERR=" . mysqli_error($conn));
+  error_log("[OK_SAVE] ready_trading affected_rows={$affected_ready}");
 
   // ready_id 확보
   $stmt = $conn->prepare("SELECT id FROM {$table_ready} WHERE tx_id=? LIMIT 1");
@@ -148,32 +156,147 @@ try {
   $stmt->close();
   $ready_id = (int)($rid['id'] ?? 0);
 
-  // progressing notes 업데이트 (가능한 경우만)
-  if ($prog_note_col) {
-    // ✅ tx_id 기반으로 korea_progressing 갱신 (tx_id 컬럼 존재 시)
-    $prog_has_tx_id = has_column($conn, $table_prog, 'tx_id');
+  // ✅ 핵심: progressing row 생성 (없으면 INSERT, 있으면 UPDATE)
+  // user_transactions 정보 조회
+  $stmt = $conn->prepare("
+    SELECT
+      t.user_id,
+      DATE(t.tx_date) AS tx_date,
+      COALESCE(t.xm_value,0) AS xm_value,
+      COALESCE(t.ultima_value,0) AS ultima_value,
+      COALESCE(t.xm_total,0) AS xm_total,
+      COALESCE(t.ultima_total,0) AS ultima_total,
+      COALESCE(t.settled_date, t.created_at) AS created_at,
+      t.settled_by,
+      t.settled_date,
+      t.reject_reason
+    FROM user_transactions t
+    WHERE t.id=? AND t.user_id=?
+    LIMIT 1
+  ");
+  $stmt->bind_param("ii", $tx_id, $user_id);
+  $stmt->execute();
+  $tx_data = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
 
-    if ($prog_has_tx_id) {
-      $stmt = $conn->prepare("UPDATE {$table_prog} SET {$prog_note_col}=? , updated_at=NOW() WHERE tx_id=?");
-      $stmt->bind_param("si", $note, $tx_id);
-      $stmt->execute();
-      $stmt->close();
-    } else {
-      // (레거시 폴백) tx_id 컬럼이 없으면 기존 키로 갱신
-      $has_prog_pair = has_column($conn, $table_prog, 'pair');
-      if ($has_prog_pair) {
-        $stmt = $conn->prepare("UPDATE {$table_prog} SET {$prog_note_col}=? , updated_at=NOW() WHERE user_id=? AND tx_date=? AND pair=?");
-        $stmt->bind_param("siss", $note, $user_id, $tx_date, $pair);
-      } else {
-        $stmt = $conn->prepare("UPDATE {$table_prog} SET {$prog_note_col}=? , updated_at=NOW() WHERE user_id=? AND tx_date=?");
-        $stmt->bind_param("sis", $note, $user_id, $tx_date);
-      }
-      $stmt->execute();
-      $stmt->close();
-    }
+  if (!$tx_data) throw new Exception('Transaction data not found for progressing');
+
+  $deposit_total = (float)$tx_data['xm_value'] + (float)$tx_data['ultima_value'];
+  $withdrawal_total = (float)$tx_data['xm_total'] + (float)$tx_data['ultima_total'];
+  $profit_loss = $withdrawal_total - $deposit_total;
+
+  // tx_id 기반 progressing row 존재 확인
+  $prog_has_tx_id = has_column($conn, $table_prog, 'tx_id');
+  $existing_prog = null;
+
+  if ($prog_has_tx_id) {
+    $stmt = $conn->prepare("SELECT id FROM {$table_prog} WHERE tx_id=? LIMIT 1");
+    $stmt->bind_param("i", $tx_id);
+    $stmt->execute();
+    $existing_prog = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+  } else {
+    // 레거시: user_id + tx_date + pair 기반 확인
+    $stmt = $conn->prepare("SELECT id FROM {$table_prog} WHERE user_id=? AND tx_date=? AND pair='xm,ultima' LIMIT 1");
+    $stmt->bind_param("is", $user_id, $tx_data['tx_date']);
+    $stmt->execute();
+    $existing_prog = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
   }
 
-$conn->commit();
+  if (!$existing_prog) {
+    // INSERT: progressing row 생성
+    $insert_cols = ["user_id", "tx_date", "pair", "deposit_status", "withdrawal_status", "profit_loss", "created_at"];
+    $insert_vals = ["?", "?", "?", "?", "?", "?", "?"];
+    $insert_types = "issddds";
+    $insert_params = [
+      $user_id,
+      $tx_data['tx_date'],
+      'xm,ultima',
+      $deposit_total,
+      $withdrawal_total,
+      $profit_loss,
+      $tx_data['created_at']
+    ];
+
+    if ($prog_has_tx_id) {
+      $insert_cols[] = "tx_id";
+      $insert_vals[] = "?";
+      $insert_types .= "i";
+      $insert_params[] = $tx_id;
+    }
+
+    // notes 컬럼 존재 확인
+    $prog_note_col = null;
+    if (has_column($conn, $table_prog, 'notes')) {
+      $prog_note_col = 'notes';
+    } else if (has_column($conn, $table_prog, 'note')) {
+      $prog_note_col = 'note';
+    }
+
+    if ($prog_note_col) {
+      $insert_cols[] = $prog_note_col;
+      $insert_vals[] = "?";
+      $insert_types .= "s";
+      $insert_params[] = "Bot processing started";
+    }
+
+    $insert_sql = "INSERT INTO {$table_prog} (" . implode(",", $insert_cols) . ") VALUES (" . implode(",", $insert_vals) . ")";
+    $stmt = $conn->prepare($insert_sql);
+    $stmt->bind_param($insert_types, ...$insert_params);
+    $stmt->execute();
+    $affected_prog = $stmt->affected_rows;
+    $stmt->close();
+
+    error_log("[OK_SAVE] progressing INSERT affected_rows={$affected_prog}");
+  } else {
+    // UPDATE: 기존 progressing row 갱신
+    $prog_note_col = null;
+    if (has_column($conn, $table_prog, 'notes')) {
+      $prog_note_col = 'notes';
+    } else if (has_column($conn, $table_prog, 'note')) {
+      $prog_note_col = 'note';
+    }
+
+    $update_parts = [
+      "deposit_status=?",
+      "withdrawal_status=?",
+      "profit_loss=?",
+      "updated_at=NOW()"
+    ];
+    $update_types = "ddd";
+    $update_params = [$deposit_total, $withdrawal_total, $profit_loss];
+
+    if ($prog_note_col) {
+      $update_parts[] = "{$prog_note_col}=?";
+      $update_types .= "s";
+      $update_params[] = "Bot processing started";
+    }
+
+    if ($prog_has_tx_id) {
+      $update_sql = "UPDATE {$table_prog} SET " . implode(", ", $update_parts) . " WHERE tx_id=?";
+      $update_types .= "i";
+      $update_params[] = $tx_id;
+    } else {
+      $update_sql = "UPDATE {$table_prog} SET " . implode(", ", $update_parts) . " WHERE user_id=? AND tx_date=? AND pair=?";
+      $update_types .= "iss";
+      $update_params[] = $user_id;
+      $update_params[] = $tx_data['tx_date'];
+      $update_params[] = 'xm,ultima';
+    }
+
+    $stmt = $conn->prepare($update_sql);
+    $stmt->bind_param($update_types, ...$update_params);
+    $stmt->execute();
+    $affected_prog = $stmt->affected_rows;
+    $stmt->close();
+
+    error_log("[OK_SAVE] progressing UPDATE affected_rows={$affected_prog}");
+  }
+
+  error_log("[OK_SAVE] progressing SQL_ERR=" . mysqli_error($conn));
+
+  $conn->commit();
 
   echo json_encode(['success'=>true,'message'=>t('msg.ok_processed_bot_running','OK processed (bot running)'), 'ready_id'=>$ready_id]);
 

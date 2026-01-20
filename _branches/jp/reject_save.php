@@ -24,12 +24,14 @@ if (!isset($_SESSION['user_id'])) {
 
 include 'db_connect.php';
 
+// ✅ JSON 응답 헤더
+header('Content-Type: application/json; charset=utf-8');
+
 // ✅ 권한: Zayne + superadmin 고정
 $username = $_SESSION['username'] ?? '';
 $role     = $_SESSION['role'] ?? '';
 if (!isset($_SESSION['user_id']) || !($username === 'Zayne' || $role === 'superadmin')) {
-    http_response_code(403);
-    echo "❌ Forbidden";
+    echo json_encode(['ok'=>false,'msg'=>'Forbidden']);
     exit;
 }
 
@@ -41,8 +43,7 @@ if (!isset($_SESSION['user_id']) || !($username === 'Zayne' || $role === 'supera
  */
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo "❌ Method Not Allowed";
+    echo json_encode(['ok'=>false,'msg'=>'Method Not Allowed']);
     exit;
 }
 
@@ -60,8 +61,11 @@ $table_progress = $region . "_progressing";
 $reject_by_user_id = (int)($_SESSION['user_id'] ?? 0);
 $reject_by_name    = $_SESSION['username'] ?? (string)$reject_by_user_id;
 
+// ✅ 디버그 로그: POST 파라미터 확인
+error_log("[REJECT_SAVE] POST=" . json_encode($_POST));
+
 if ($user_id <= 0 || $reason === '' || ($tx_id <= 0 && $ready_id <= 0)) {
-    echo "❌ Invalid input.";
+    echo json_encode(['ok'=>false,'msg'=>'Invalid input']);
     exit;
 }
 
@@ -127,7 +131,10 @@ try {
     $stmt1 = $conn->prepare($sql1);
     $stmt1->bind_param("is", $user_id, $reason);
     if (!$stmt1->execute()) throw new Exception("user_rejects error: " . $stmt1->error);
+    $affected_rejects = $stmt1->affected_rows;
     $stmt1->close();
+
+    error_log("[REJECT_SAVE] user_rejects affected_rows={$affected_rejects}");
 
     // -------------------------------------------------
     // 4) user_transactions 업데이트 (tx_id 기준)
@@ -142,7 +149,10 @@ try {
     $stmt2 = $conn->prepare($sql2);
     $stmt2->bind_param("ssii", $reason, $reject_by_name, $tx_id, $user_id);
     if (!$stmt2->execute()) throw new Exception("user_transactions error: " . $stmt2->error);
+    $affected_tx = $stmt2->affected_rows;
     $stmt2->close();
+
+    error_log("[REJECT_SAVE] user_transactions affected_rows={$affected_tx}");
 
     // -------------------------------------------------
     // 5) ready_trading UPSERT (tx_id UNIQUE 기준)
@@ -163,7 +173,10 @@ try {
     $stmt3 = $conn->prepare($sql3);
     $stmt3->bind_param("iisss", $user_id, $tx_id, $tx_date, $reason, $reject_by_name);
     if (!$stmt3->execute()) throw new Exception("ready_trading error: " . $stmt3->error);
+    $affected_ready = $stmt3->affected_rows;
     $stmt3->close();
+
+    error_log("[REJECT_SAVE] ready_trading affected_rows={$affected_ready}");
 
     // -------------------------------------------------
     // 6) progressing 갱신 (기존 UNIQUE(user_id, tx_date, pair) 구조 유지)
@@ -201,15 +214,19 @@ try {
     $stmt4 = $conn->prepare($sql4);
     $stmt4->bind_param("ssi", $reject_by_name, $reason, $tx_id);
     if (!$stmt4->execute()) throw new Exception("progressing error: " . $stmt4->error);
+    $affected_prog = $stmt4->affected_rows;
     $stmt4->close();
 
+    error_log("[REJECT_SAVE] progressing affected_rows={$affected_prog}");
+    error_log("[REJECT_SAVE] SQL_ERR=" . mysqli_error($conn));
+
     $conn->commit();
-    echo "✅ Reject completed";
+    echo json_encode(['ok'=>true,'msg'=>'Reject completed']);
 
 } catch (Exception $e) {
     $conn->rollback();
-    error_log("Reject error: " . $e->getMessage());
-    echo "❌ Error occurred: " . $e->getMessage();
+    error_log("[REJECT_SAVE] Exception: " . $e->getMessage());
+    echo json_encode(['ok'=>false,'msg'=>$e->getMessage()]);
 }
 
 $conn->close();

@@ -185,10 +185,15 @@ function submitReject() {
     body: `user_id=${encodeURIComponent(userId)}&ready_id=${encodeURIComponent(readyId)}&tx_id=${encodeURIComponent(txId)}&progressing_id=${encodeURIComponent(progId)}&reason=${encodeURIComponent(reason)}&region=${encodeURIComponent(REGION)}`
   })
   .then(res => res.text())
-  .then(msg => {
-    alert(msg);
-    closeRejectModal();
-    window.location.reload();
+  .then(text => {
+    let data = null;
+    try { data = JSON.parse(text); } catch(e) {}
+    if (!data) { alert('Server response: ' + text); return; }
+    alert(data.msg || 'Reject processed');
+    if (data.ok) {
+      closeRejectModal();
+      window.location.reload();
+    }
   })
   .catch(err => alert(<?= json_encode(t('error.occurred_prefix','Error occurred: ')) ?> + err));
 }
