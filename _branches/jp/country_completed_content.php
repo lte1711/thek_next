@@ -2,10 +2,20 @@
 <?php
 $region = $_GET['region'] ?? 'korea';
 $countryLabel = ($region === 'japan') ? 'Japan' : 'Korea';
+
+// Filter parameters
+$from_date = $_GET['from'] ?? '';
+$to_date = $_GET['to'] ?? '';
+$search_query = $_GET['q'] ?? '';
+$is_export_enabled = false; // Completed page does not have export yet
+$search_placeholder = 'Username / Pair';
+$current_page = 'country_completed.php';
 ?>
 <div class="country-page-header">
   <h1 class="country-page-title"><?= $countryLabel ?> - C / L</h1>
 </div>
+
+<?php include __DIR__ . '/includes/country_filterbar.php'; ?>
 
 <?php if (!isset($result_completed) || !$result_completed): ?>
   <div style="padding:10px 0; color:#666;">No completed transactions.</div>

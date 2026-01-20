@@ -106,6 +106,8 @@ if (!isset($content_file) && !$is_country_page) {
     <link rel="stylesheet" href="css/pages/country_menu.css?v=<?= filemtime(__DIR__ . '/css/pages/country_menu.css') ?>">
     <!-- Country Common Styles -->
     <link rel="stylesheet" href="css/pages/country_common.css?v=<?= filemtime(__DIR__ . '/css/pages/country_common.css') ?>">
+    <!-- Country Filter Bar Styles -->
+    <link rel="stylesheet" href="css/pages/country_filterbar.css?v=<?= filemtime(__DIR__ . '/css/pages/country_filterbar.css') ?>">
     <?php endif; ?>
     <style>
         /* JP standard: compact inline date input */

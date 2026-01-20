@@ -1,10 +1,20 @@
 <?php
 $region = $_GET['region'] ?? 'korea';
 $countryLabel = ($region === 'japan') ? 'Japan' : 'Korea';
+
+// Filter parameters
+$from_date = $_GET['from'] ?? '';
+$to_date = $_GET['to'] ?? '';
+$search_query = $_GET['q'] ?? '';
+$is_export_enabled = false; // Ready page does not have export yet
+$search_placeholder = 'Username / Pair / Broker';
+$current_page = 'country_ready.php';
 ?>
 <div class="country-page-header">
   <h1 class="country-page-title"><?= $countryLabel ?> - Ready for Trading</h1>
 </div>
+
+<?php include __DIR__ . '/includes/country_filterbar.php'; ?>
 
 <!-- ✅ 최소 CSS 추가 (모달이 제대로 보이도록) -->
 <style>

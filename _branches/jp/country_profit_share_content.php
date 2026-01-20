@@ -1,29 +1,29 @@
 <?php
 $region = $_GET['region'] ?? 'korea';
 $countryLabel = ($region === 'japan') ? 'Japan' : 'Korea';
+
+// Filter parameters - map existing partner_date to from/to
+$from_date = $_GET['from'] ?? $_GET['partner_date'] ?? '';
+$to_date = $_GET['to'] ?? $_GET['partner_date'] ?? '';
+$search_query = $_GET['q'] ?? '';
+$is_export_enabled = false; // P/S has settlement, not export
+$search_placeholder = 'Partner Name';
+$current_page = 'country_profit_share.php';
+
+// Keep partner_date for backward compatibility
+if (!empty($_GET['partner_date'])) {
+    $partner_date = $_GET['partner_date'];
+} elseif (!empty($from_date)) {
+    $partner_date = $from_date;
+} else {
+    $partner_date = '';
+}
 ?>
 <div class="country-page-header">
   <h1 class="country-page-title"><?= $countryLabel ?> - P / S</h1>
 </div>
 
-<div style="margin:12px 0 18px;">
-  <form method="GET" class="form-inline" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-    <input type="hidden" name="region" value="<?= htmlspecialchars($region) ?>">
-
-    <label style="font-weight:600;"><?= t('label.select_date','Select Date:') ?></label>
-    <input type="text" class="js-date" name="partner_date" value="<?= htmlspecialchars($partner_date ?? '') ?>" autocomplete="off" inputmode="none" placeholder="YYYY-MM-DD" style="width:165px;">
-
-    <button type="submit"><?= t('btn.search','Search') ?></button>
-
-    <?php if (!empty($partner_is_settled)): ?>
-      <button type="button" disabled style="opacity:0.6; cursor:not-allowed;"><?= t('btn.settled','Settled') ?></button>
-      <span style="font-size:12px; opacity:0.8;">
-        <?= !empty($partner_settled_at) ? "(" . t('partner.settlement.settled_at', 'Settled at') . ": " . htmlspecialchars($partner_settled_at) . ")" : "" ?>
-      </span>
-    <?php else: ?>
-      <button type="button" onclick="confirmPartnerSettlement(event)"><?= t('btn.settle','Settle') ?></button>
-    <?php endif; ?>
-  </form>
+<?php include __DIR__ . '/includes/country_filterbar.php'; ?>
 
   <table style="margin-top:12px;">
     <tr>
