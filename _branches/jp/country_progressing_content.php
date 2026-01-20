@@ -20,7 +20,8 @@ $search_placeholder = 'Username / Pair';
   .status-no { color:#ff2d6f; font-weight:700; }
 </style>
 
-<table>
+<div class="country-table-wrap">
+<table class="country-table country-table--progressing">
   <tr>
     <th><?= t('table.date','Date') ?></th>
     <th><?= t('table.username','Username') ?></th>
@@ -87,3 +88,4 @@ $search_placeholder = 'Username / Pair';
     <?php endwhile; ?>
   <?php endif; ?>
 </table>
+</div>

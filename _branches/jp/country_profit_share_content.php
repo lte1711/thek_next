@@ -24,7 +24,8 @@ if (!empty($_GET['partner_date'])) {
 
 <?php include __DIR__ . '/includes/country_filterbar.php'; ?>
 
-  <table style="margin-top:12px;">
+  <div class="country-table-wrap">
+  <table class="country-table country-table--profit-share" style="margin-top:12px;">
     <tr>
       <th><?= t('table.name','Name') ?></th>
       <th><?= t('table.total_revenue','Total Revenue') ?></th>
@@ -66,6 +67,7 @@ if (!empty($_GET['partner_date'])) {
     <?php endif; ?>
 
   </table>
+  </div>
 </div>
 
 <script>

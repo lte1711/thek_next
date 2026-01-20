@@ -1,0 +1,149 @@
+/* Country Pages Table Common Styles */
+
+/* Table Wrapper */
+.country-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+/* Common Table Styles */
+.country-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.country-table th,
+.country-table td {
+    padding: 10px 8px;
+    border: 1px solid #e0e3e7;
+    vertical-align: middle;
+}
+
+.country-table th {
+    background: #f8f9fa;
+    font-weight: 700;
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* Alignment Utilities */
+.ta-left { text-align: left !important; }
+.ta-center { text-align: center !important; }
+.ta-right { text-align: right !important; }
+
+/* Ellipsis Utility */
+.ellipsis {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Account Info Lines (Ready Page) */
+.acct-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1.2;
+    text-align: left;
+}
+
+.acct-line {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.acct-line .k {
+    display: inline-block;
+    width: 44px;
+    color: #64748b;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.acct-line .v {
+    word-break: break-word;
+    flex: 1;
+}
+
+/* Ready Table Specific */
+.country-table--ready th:nth-child(1),
+.country-table--ready td:nth-child(1) { width: 110px; text-align: center; }
+
+.country-table--ready th:nth-child(2),
+.country-table--ready td:nth-child(2) { width: 120px; text-align: left; }
+
+.country-table--ready th:nth-child(3),
+.country-table--ready td:nth-child(3) { width: 300px; text-align: left; }
+
+.country-table--ready th:nth-child(4),
+.country-table--ready td:nth-child(4) { width: 300px; text-align: left; }
+
+.country-table--ready th:nth-child(5),
+.country-table--ready td:nth-child(5) { width: 140px; text-align: right; }
+
+.country-table--ready th:nth-child(6),
+.country-table--ready td:nth-child(6) { width: 140px; text-align: center; }
+
+/* Progressing Table Specific */
+.country-table--progressing th:nth-child(1),
+.country-table--progressing td:nth-child(1) { width: 110px; text-align: center; }
+
+.country-table--progressing th:nth-child(2),
+.country-table--progressing td:nth-child(2) { width: 120px; text-align: left; }
+
+.country-table--progressing th:nth-child(3),
+.country-table--progressing td:nth-child(3) { width: 120px; text-align: left; }
+
+.country-table--progressing th:nth-child(4),
+.country-table--progressing td:nth-child(4) { width: 90px; text-align: center; }
+
+.country-table--progressing th:nth-child(5),
+.country-table--progressing td:nth-child(5) { width: 110px; text-align: center; }
+
+.country-table--progressing th:nth-child(6),
+.country-table--progressing td:nth-child(6) { width: 140px; text-align: center; }
+
+.country-table--progressing th:nth-child(7),
+.country-table--progressing td:nth-child(7) { width: 140px; text-align: left; }
+
+.country-table--progressing th:nth-child(8),
+.country-table--progressing td:nth-child(8) { width: 110px; text-align: center; }
+
+/* Completed Table Specific */
+.country-table--completed th:nth-child(1),
+.country-table--completed td:nth-child(1) { width: 110px; text-align: center; }
+
+.country-table--completed th:nth-child(2),
+.country-table--completed td:nth-child(2) { width: 120px; text-align: left; }
+
+.country-table--completed th:nth-child(3),
+.country-table--completed td:nth-child(3) { width: 120px; text-align: left; }
+
+.country-table--completed th:nth-child(4),
+.country-table--completed td:nth-child(4) { width: 100px; text-align: center; }
+
+.country-table--completed th:nth-child(5),
+.country-table--completed td:nth-child(5) { width: 110px; text-align: right; }
+
+.country-table--completed th:nth-child(6),
+.country-table--completed td:nth-child(6) { width: 140px; text-align: left; }
+
+.country-table--completed th:nth-child(7),
+.country-table--completed td:nth-child(7) { width: 110px; text-align: center; }
+
+/* Profit Share Table Specific */
+.country-table--profit-share th:nth-child(1),
+.country-table--profit-share td:nth-child(1) { width: 140px; text-align: left; }
+
+.country-table--profit-share th:nth-child(2),
+.country-table--profit-share td:nth-child(2) { width: 140px; text-align: right; }
+
+.country-table--profit-share th:nth-child(3),
+.country-table--profit-share td:nth-child(3) { width: 140px; text-align: right; }
+
+/* Status indicators */
+.status-ok { color: #22c55e; font-weight: 700; }
+.status-no { color: #ff2d6f; font-weight: 700; }

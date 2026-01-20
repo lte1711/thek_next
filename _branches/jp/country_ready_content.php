@@ -52,7 +52,8 @@ $search_placeholder = 'Username / Pair / Broker';
   }
 </style>
 
-<table>
+<div class="country-table-wrap">
+<table class="country-table country-table--ready">
   <tr>
     <th><?= t('table.date','Date') ?></th><th><?= t('table.username','Username') ?></th><th><?= t('table.xm_account','XM Account') ?></th><th><?= t('table.ultima_account','Ultima Account') ?></th><th><?= t('table.deposit','Deposit') ?></th><th><?= t('table.action','Action') ?></th>
   </tr>
@@ -64,21 +65,25 @@ $search_placeholder = 'Username / Pair / Broker';
       <td><?= htmlspecialchars($row['tx_date'] ?? ($row['settled_date'] ?? '-')) ?></td>
       <td><?= htmlspecialchars($row['username'] ?? '-') ?></td>
 
-      <td class="platform-box">
-        id: <?= htmlspecialchars($row['xm_id'] ?? '-') ?><br>
-        pw: <?= htmlspecialchars($row['xm_pw'] ?? '-') ?><br>
-        server: <?= htmlspecialchars($row['xm_server'] ?? '-') ?>
+      <td>
+        <div class="acct-lines">
+          <div class="acct-line"><span class="k">id:</span><span class="v"><?= htmlspecialchars($row['xm_id'] ?? '-') ?></span></div>
+          <div class="acct-line"><span class="k">pw:</span><span class="v"><?= htmlspecialchars($row['xm_pw'] ?? '-') ?></span></div>
+          <div class="acct-line"><span class="k">server:</span><span class="v"><?= htmlspecialchars($row['xm_server'] ?? '-') ?></span></div>
+        </div>
       </td>
 
-      <td class="platform-box">
-        id: <?= htmlspecialchars($row['ultima_id'] ?? '-') ?><br>
-        pw: <?= htmlspecialchars($row['ultima_pw'] ?? '-') ?><br>
-        server: <?= htmlspecialchars($row['ultima_server'] ?? '-') ?>
+      <td>
+        <div class="acct-lines">
+          <div class="acct-line"><span class="k">id:</span><span class="v"><?= htmlspecialchars($row['ultima_id'] ?? '-') ?></span></div>
+          <div class="acct-line"><span class="k">pw:</span><span class="v"><?= htmlspecialchars($row['ultima_pw'] ?? '-') ?></span></div>
+          <div class="acct-line"><span class="k">server:</span><span class="v"><?= htmlspecialchars($row['ultima_server'] ?? '-') ?></span></div>
+        </div>
       </td>
 
-      <td class="platform-box">
-        xm: ₩<?= number_format((float)($row['xm_value'] ?? 0), 2) ?><br>
-        ultima: ₩<?= number_format((float)($row['ultima_value'] ?? 0), 2) ?>
+      <td>
+        <div>xm: ₩<?= number_format((float)($row['xm_value'] ?? 0), 2) ?></div>
+        <div>ultima: ₩<?= number_format((float)($row['ultima_value'] ?? 0), 2) ?></div>
       </td>
 
       <td>
@@ -108,6 +113,7 @@ $search_placeholder = 'Username / Pair / Broker';
     <?php endwhile; ?>
   <?php endif; ?>
 </table>
+</div>
 
 <!-- Reject Reason Modal -->
 <div id="reasonModal" class="modal">

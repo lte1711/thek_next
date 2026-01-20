@@ -21,7 +21,8 @@ $search_placeholder = 'Username / Pair';
 <?php elseif (mysqli_num_rows($result_completed) === 0): ?>
   <div style="padding:10px 0; color:#666;">No completed transactions.</div>
 <?php else: ?>
-  <table>
+  <div class="country-table-wrap">
+  <table class="country-table country-table--completed">
     <tr>
       <th><?= t('table.date','Date') ?></th>
       <th><?= t('table.username','Username') ?></th>
@@ -87,4 +88,5 @@ $search_placeholder = 'Username / Pair';
       </tr>
     <?php endwhile; ?>
   </table>
+  </div>
 <?php endif; ?>
