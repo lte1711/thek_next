@@ -1,5 +1,6 @@
 <?php
 session_start();
+error_log("[REJECT_SAVE] HIT " . date('c') . " REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE'));
 
 // Safe initialization
 if (!function_exists('t')) {
@@ -129,8 +130,19 @@ try {
     // -------------------------------------------------
     $sql1 = "INSERT INTO user_rejects (user_id, reason, created_at) VALUES (?, ?, NOW())";
     $stmt1 = $conn->prepare($sql1);
+    if (!$stmt1) {
+      error_log("[REJECT_SAVE] user_rejects PREPARE FAIL: " . mysqli_error($conn));
+      http_response_code(500);
+      echo json_encode(['ok'=>false,'msg'=>'user_rejects prepare failed: ' . mysqli_error($conn)]);
+      exit;
+    }
     $stmt1->bind_param("is", $user_id, $reason);
-    if (!$stmt1->execute()) throw new Exception("user_rejects error: " . $stmt1->error);
+    if (!$stmt1->execute()) {
+      error_log("[REJECT_SAVE] user_rejects EXECUTE FAIL: " . $stmt1->error);
+      http_response_code(500);
+      echo json_encode(['ok'=>false,'msg'=>'user_rejects execute failed: ' . $stmt1->error]);
+      exit;
+    }
     $affected_rejects = $stmt1->affected_rows;
     $stmt1->close();
 
@@ -221,11 +233,14 @@ try {
     error_log("[REJECT_SAVE] SQL_ERR=" . mysqli_error($conn));
 
     $conn->commit();
+    http_response_code(200);
+    error_log("[REJECT_SAVE] SUCCESS tx_id={$tx_id} user_id={$user_id}");
     echo json_encode(['ok'=>true,'msg'=>'Reject completed']);
 
 } catch (Exception $e) {
     $conn->rollback();
-    error_log("[REJECT_SAVE] Exception: " . $e->getMessage());
+    error_log("[REJECT_SAVE] EXCEPTION: " . $e->getMessage());
+    http_response_code(400);
     echo json_encode(['ok'=>false,'msg'=>$e->getMessage()]);
 }
 

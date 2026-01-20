@@ -7,6 +7,7 @@
 //   - 더 이상 (user_id, tx_date, day_seq) 같은 조합키에 의존하지 않습니다.
 
 session_start();
+error_log("[OK_SAVE] HIT " . date('c') . " REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE'));
 
 // Safe initialization
 if (!function_exists('t')) {
@@ -85,8 +86,19 @@ try {
 
   // 거래일 확보 (YYYY-MM-DD)
   $stmt = $conn->prepare("SELECT DATE(tx_date) AS d, COALESCE(external_done_chk,0) AS ext, COALESCE(pair, 'XM/Ultima') AS pair FROM user_transactions WHERE id=? AND user_id=?");
+  if (!$stmt) {
+    error_log("[OK_SAVE] SQL PREPARE FAIL: " . mysqli_error($conn));
+    http_response_code(500);
+    echo json_encode(['success'=>false,'message'=>'SQL prepare failed: ' . mysqli_error($conn)]);
+    exit;
+  }
   $stmt->bind_param("ii",$tx_id,$user_id);
-  $stmt->execute();
+  if (!$stmt->execute()) {
+    error_log("[OK_SAVE] SQL EXECUTE FAIL: " . $stmt->error);
+    http_response_code(500);
+    echo json_encode(['success'=>false,'message'=>'SQL execute failed: ' . $stmt->error]);
+    exit;
+  }
   $txrow = $stmt->get_result()->fetch_assoc();
   $stmt->close();
   if(!$txrow || empty($txrow['d'])) throw new Exception('Transaction not found');
@@ -139,8 +151,19 @@ try {
        . "ON DUPLICATE KEY UPDATE ".implode(", ", $upd);
 
   $stmt = $conn->prepare($sql);
+  if (!$stmt) {
+    error_log("[OK_SAVE] ready_trading PREPARE FAIL: " . mysqli_error($conn));
+    http_response_code(500);
+    echo json_encode(['success'=>false,'message'=>'Ready trading prepare failed: ' . mysqli_error($conn)]);
+    exit;
+  }
   $stmt->bind_param($it, ...$ip);
-  $stmt->execute();
+  if (!$stmt->execute()) {
+    error_log("[OK_SAVE] ready_trading EXECUTE FAIL: " . $stmt->error);
+    http_response_code(500);
+    echo json_encode(['success'=>false,'message'=>'Ready trading execute failed: ' . $stmt->error]);
+    exit;
+  }
   $affected_ready = $stmt->affected_rows;
   $stmt->close();
 
@@ -243,8 +266,19 @@ try {
 
     $insert_sql = "INSERT INTO {$table_prog} (" . implode(",", $insert_cols) . ") VALUES (" . implode(",", $insert_vals) . ")";
     $stmt = $conn->prepare($insert_sql);
+    if (!$stmt) {
+      error_log("[OK_SAVE] progressing INSERT PREPARE FAIL: " . mysqli_error($conn));
+      http_response_code(500);
+      echo json_encode(['success'=>false,'message'=>'Progressing insert prepare failed: ' . mysqli_error($conn)]);
+      exit;
+    }
     $stmt->bind_param($insert_types, ...$insert_params);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+      error_log("[OK_SAVE] progressing INSERT EXECUTE FAIL: " . $stmt->error);
+      http_response_code(500);
+      echo json_encode(['success'=>false,'message'=>'Progressing insert execute failed: ' . $stmt->error]);
+      exit;
+    }
     $affected_prog = $stmt->affected_rows;
     $stmt->close();
 
@@ -286,8 +320,19 @@ try {
     }
 
     $stmt = $conn->prepare($update_sql);
+    if (!$stmt) {
+      error_log("[OK_SAVE] progressing UPDATE PREPARE FAIL: " . mysqli_error($conn));
+      http_response_code(500);
+      echo json_encode(['success'=>false,'message'=>'Progressing update prepare failed: ' . mysqli_error($conn)]);
+      exit;
+    }
     $stmt->bind_param($update_types, ...$update_params);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+      error_log("[OK_SAVE] progressing UPDATE EXECUTE FAIL: " . $stmt->error);
+      http_response_code(500);
+      echo json_encode(['success'=>false,'message'=>'Progressing update execute failed: ' . $stmt->error]);
+      exit;
+    }
     $affected_prog = $stmt->affected_rows;
     $stmt->close();
 
@@ -298,10 +343,14 @@ try {
 
   $conn->commit();
 
+  http_response_code(200);
+  error_log("[OK_SAVE] SUCCESS tx_id={$tx_id} user_id={$user_id}");
   echo json_encode(['success'=>true,'message'=>t('msg.ok_processed_bot_running','OK processed (bot running)'), 'ready_id'=>$ready_id]);
 
 } catch (Throwable $e){
   if(isset($conn)) { try{$conn->rollback();}catch(Throwable $ignore){} }
+  error_log("[OK_SAVE] EXCEPTION: " . $e->getMessage());
+  http_response_code(400);
   echo json_encode(['success'=>false,'message'=>$e->getMessage()]);
 }
 ?>
