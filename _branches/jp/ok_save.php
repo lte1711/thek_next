@@ -213,11 +213,22 @@ try {
   $existing_prog = null;
 
   if ($prog_has_tx_id) {
+    // ✅ tx_id로 먼저 찾기 (NULL이면 못 찾음)
     $stmt = $conn->prepare("SELECT id FROM {$table_prog} WHERE tx_id=? LIMIT 1");
     $stmt->bind_param("i", $tx_id);
     $stmt->execute();
     $existing_prog = $stmt->get_result()->fetch_assoc();
     $stmt->close();
+    
+    // ✅ tx_id로 못 찾으면 user_id+tx_date+pair로 재시도 (tx_id=NULL인 기존 row 찾기)
+    if (!$existing_prog) {
+      error_log("[OK_SAVE] tx_id not found, trying user_id+tx_date+pair lookup");
+      $stmt = $conn->prepare("SELECT id FROM {$table_prog} WHERE user_id=? AND tx_date=? AND pair='xm,ultima' LIMIT 1");
+      $stmt->bind_param("is", $user_id, $tx_data['tx_date']);
+      $stmt->execute();
+      $existing_prog = $stmt->get_result()->fetch_assoc();
+      $stmt->close();
+    }
   } else {
     // 레거시: user_id + tx_date + pair 기반 확인
     $stmt = $conn->prepare("SELECT id FROM {$table_prog} WHERE user_id=? AND tx_date=? AND pair='xm,ultima' LIMIT 1");
@@ -308,23 +319,25 @@ try {
     $update_types = "ddd";
     $update_params = [$deposit_total, $withdrawal_total, $profit_loss];
 
+    // ✅ tx_id가 NULL인 경우를 위해 항상 tx_id 업데이트
+    if ($prog_has_tx_id) {
+      $update_parts[] = "tx_id=?";
+      $update_types .= "i";
+      $update_params[] = $tx_id;
+    }
+
     if ($prog_note_col) {
       $update_parts[] = "{$prog_note_col}=?";
       $update_types .= "s";
       $update_params[] = "Bot processing started";
     }
 
-    if ($prog_has_tx_id) {
-      $update_sql = "UPDATE {$table_prog} SET " . implode(", ", $update_parts) . " WHERE tx_id=?";
-      $update_types .= "i";
-      $update_params[] = $tx_id;
-    } else {
-      $update_sql = "UPDATE {$table_prog} SET " . implode(", ", $update_parts) . " WHERE user_id=? AND tx_date=? AND pair=?";
-      $update_types .= "iss";
-      $update_params[] = $user_id;
-      $update_params[] = $tx_data['tx_date'];
-      $update_params[] = 'xm,ultima';
-    }
+    // ✅ WHERE 조건은 user_id+tx_date+pair로 통일 (tx_id=NULL 케이스 처리)
+    $update_sql = "UPDATE {$table_prog} SET " . implode(", ", $update_parts) . " WHERE user_id=? AND tx_date=? AND pair=?";
+    $update_types .= "iss";
+    $update_params[] = $user_id;
+    $update_params[] = $tx_data['tx_date'];
+    $update_params[] = 'xm,ultima';
 
     $stmt = $conn->prepare($update_sql);
     if (!$stmt) {
