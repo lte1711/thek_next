@@ -111,13 +111,14 @@ $sql_ready = "
   LEFT JOIN user_details d ON d.user_id = t.user_id
   LEFT JOIN users u ON u.id = t.user_id
 
-  WHERE COALESCE(t.withdrawal_chk,0) = 0
-    -- Ready only: never show completed/rejected rows (including settlement rejects)
-    AND COALESCE(t.settle_chk,0) <> 2
-    AND (COALESCE(t.reject_by,0) = 0)
+  WHERE r.id IS NOT NULL
     -- ✅ Region filter: only show if registered in this region's ready_trading table
-    AND r.id IS NOT NULL
-    AND (r.status IS NULL OR r.status='ready')
+    AND (
+      -- Show pending transactions (not yet withdrawn)
+      (COALESCE(t.withdrawal_chk,0) = 0 AND COALESCE(t.settle_chk,0) <> 2)
+      -- Also show approved/rejected for review
+      OR r.status IN ('approved', 'rejected')
+    )
 
   ORDER BY DATE(t.tx_date) DESC, t.id DESC
   LIMIT {$ready_per_page} OFFSET {$ready_offset}
