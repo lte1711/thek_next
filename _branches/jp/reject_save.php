@@ -133,6 +133,7 @@ try {
     // -------------------------------------------------
     $sql2 = "UPDATE user_transactions
                 SET settle_chk=2,
+                    external_done_chk=0,
                     reject_reason=?,
                     reject_by=?,
                     reject_date=NOW()
@@ -189,7 +190,6 @@ try {
                     user_id=VALUES(user_id),
                     tx_date=VALUES(tx_date),
                     pair=VALUES(pair),
-                    deposit_status=VALUES(deposit_status),
                     withdrawal_status=VALUES(withdrawal_status),
                     profit_loss=VALUES(profit_loss),
                     notes=VALUES(notes),

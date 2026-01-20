@@ -3,6 +3,8 @@ $deposit_blocked = $deposit_blocked ?? false;
 $blocked_tx = $blocked_tx ?? null;
 $blocked_reasons = $blocked_reasons ?? [];
 $blocked_action_url = $blocked_action_url ?? "investor_withdrawal.php";
+$reject_mode = $reject_mode ?? false;
+$reject_tx = $reject_tx ?? null;
 
 // ✅ blocked_reasons 번역 처리 (로직 영향 없음)
 $translated_reasons = [];
@@ -34,7 +36,68 @@ if ($deposit_blocked && $blocked_tx) {
 <div class="form-container">
   <h2><?= t('page.investor_deposit', '거래 입력') ?></h2>
 
-  <?php if ($deposit_blocked): ?>
+  <?php if ($reject_mode && $reject_tx): ?>
+    <div class="alert-box" style="background:#fff3cd; border:1px solid #ffc107; color:#856404; margin-bottom:16px; padding:12px;">
+      <div style="font-weight:700; margin-bottom:6px;">⚠️ <?= t('deposit.reject.title', 'Rejected Transaction - Amount Edit Only') ?></div>
+      <div style="margin-bottom:10px;">
+        <?= t('deposit.reject.tx_id', 'Transaction ID') ?>: <strong><?= htmlspecialchars($reject_tx['id']) ?></strong><br>
+        <?= t('deposit.reject.reason', 'Reject Reason') ?>: <?= htmlspecialchars($reject_tx['reject_reason']) ?><br>
+        <em><?= t('deposit.reject.notice', '입금액만 수정할 수 있습니다. 다른 정보는 변경할 수 없습니다.') ?></em>
+      </div>
+    </div>
+
+    <form method="POST">
+      <input type="hidden" name="reject_update_mode" value="1">
+      <input type="hidden" name="tx_id" value="<?= htmlspecialchars($reject_tx['id']) ?>">
+      <input type="hidden" name="tx_date" value="<?= htmlspecialchars($reject_tx['tx_date']) ?>">
+
+      <div class="form-group">
+        <label><?= t('deposit.form.tx_date', '거래소에 입금한 날짜') ?></label>
+        <input type="text" value="<?= htmlspecialchars($reject_tx['tx_date']) ?>" disabled style="width:165px; background:#f5f5f5;">
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr><th><?= t('deposit.form.xm_th', 'XM (원)') ?></th><th><?= t('deposit.form.ultima_th', 'Ultima (원)') ?></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <input type="text" name="xm_value" id="xm_value_reject"
+                     value="<?= htmlspecialchars(number_format((float)$reject_tx['xm_value'], 2)) ?>"
+                     placeholder="<?= htmlspecialchars(t('deposit.form.xm_placeholder', 'XM 금액 입력')) ?>">
+            </td>
+            <td>
+              <input type="text" name="ultima_value" id="ultima_value_reject"
+                     value="<?= htmlspecialchars(number_format((float)$reject_tx['ultima_value'], 2)) ?>"
+                     placeholder="<?= htmlspecialchars(t('deposit.form.ultima_placeholder', 'Ultima 금액 입력')) ?>">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button type="submit" class="btn" style="background:#ffc107; color:#000;">
+        <?= t('deposit.reject.update_btn', 'Update Amount') ?>
+      </button>
+    </form>
+
+    <script>
+    function formatNumberWithComma(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value === '') { input.value = ''; return; }
+        input.value = Number(value).toLocaleString();
+    }
+    document.getElementById('xm_value_reject').addEventListener('input', function () { formatNumberWithComma(this); });
+    document.getElementById('ultima_value_reject').addEventListener('input', function () { formatNumberWithComma(this); });
+    document.querySelector('form').addEventListener('submit', function () {
+        const xmInput = document.getElementById('xm_value_reject');
+        const ultimaInput = document.getElementById('ultima_value_reject');
+        xmInput.value = xmInput.value.replace(/,/g, '');
+        ultimaInput.value = ultimaInput.value.replace(/,/g, '');
+    });
+    </script>
+
+  <?php elseif ($deposit_blocked): ?>
     <div class="alert-box alert-danger" style="margin-bottom:16px;">
       <div style="font-weight:700; margin-bottom:6px;"><?= t('deposit.blocked.title', '입금 불가') ?></div>
       <div style="margin-bottom:10px;">
@@ -50,6 +113,7 @@ if ($deposit_blocked && $blocked_tx) {
     </div>
   <?php endif; ?>
 
+  <?php if (!$reject_mode): ?>
   <form method="POST">
     <div class="form-group">
       <label><?= t('deposit.form.tx_date', '거래소에 입금한 날짜') ?></label>
@@ -85,6 +149,7 @@ if ($deposit_blocked && $blocked_tx) {
       <?= t('common.save', '저장하기') ?>
     </button>
   </form>
+  <?php endif; ?>
 </div>
 
 <?php if (!$deposit_blocked): ?>
