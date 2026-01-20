@@ -210,11 +210,24 @@ function submitOk(progressingId, userId, txId){
   .then(res => res.text())
   .then(t => {
     let data = null;
-    try { data = JSON.parse(t); } catch(e) {}
-    if (!data) { alert('Server response: ' + t); return; }
-    alert(data.message || (data.success ? <?= json_encode(t('msg.ok_processed','OK processed successfully')) ?> : <?= json_encode(t('error.process_failed','Process failed')) ?>));
-    if (data.success) {
+    try { data = JSON.parse(t); } catch(e) {
+      alert('Invalid JSON response: ' + t);
+      return;
+    }
+    
+    // ✅ 성공 여부 명확히 체크
+    if (!data || typeof data.success === 'undefined') {
+      alert('Malformed response: ' + t);
+      return;
+    }
+    
+    const msg = data.message || (data.success ? 'OK processed successfully' : 'Process failed');
+    alert(msg);
+    
+    if (data.success === true) {
       window.location.reload();
+    } else {
+      console.error('[submitOk] Failed:', data);
     }
   })
   .catch(err => alert(<?= json_encode(t('error.occurred_prefix','Error occurred: ')) ?> + err));

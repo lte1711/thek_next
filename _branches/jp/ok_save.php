@@ -283,6 +283,13 @@ try {
     $stmt->close();
 
     error_log("[OK_SAVE] progressing INSERT affected_rows={$affected_prog}");
+    
+    if ($affected_prog === 0) {
+      error_log("[OK_SAVE] progressing INSERT affected 0 rows - no data inserted");
+      http_response_code(500);
+      echo json_encode(['success'=>false,'message'=>'Progressing insert affected 0 rows']);
+      exit;
+    }
   } else {
     // UPDATE: 기존 progressing row 갱신
     $prog_note_col = null;
@@ -337,6 +344,10 @@ try {
     $stmt->close();
 
     error_log("[OK_SAVE] progressing UPDATE affected_rows={$affected_prog}");
+    
+    if ($affected_prog === 0) {
+      error_log("[OK_SAVE] WARNING: progressing UPDATE affected 0 rows - data unchanged or not found");
+    }
   }
 
   error_log("[OK_SAVE] progressing SQL_ERR=" . mysqli_error($conn));
