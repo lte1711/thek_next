@@ -63,6 +63,7 @@ endif;
       $dividend   = $row['dividend_chk'];
       $settled    = $row['settle_chk'];
       $reject     = $row['reject_reason'];
+      $reject_by  = $row['reject_by'] ?? null;
 
       $all_three = ($deposit == 1 && $external == 1 && $withdrawal == 1 && $dividend == 1);
       $all_four  = ($all_three && $settled == 1);
@@ -95,7 +96,7 @@ endif;
       <td><?= ($withdrawal == 1) ? '<span class="check">✅</span>' : ((int)$external===1 ? '<a href="investor_withdrawal.php?user_id='.$user_id.'&id='.$row['id'].'" class="fail">❌</a>' : '<span class="muted">⏳</span>') ?></td>
       <td><?= ($dividend == 1) ? '<span class="check">✅</span>' : ((int)$external===1 ? '<a href="investor_profit_share.php?user_id='.$user_id.'&id='.$row['id'].'" class="fail">❌</a>' : '<span class="muted">⏳</span>') ?></td>
       <td>
-        <?php if (!empty($reject) || !empty($row['reject_by'])): ?>
+        <?php if (!empty($reject) || !empty($reject_by)): ?>
           <button class="confirm-btn" onclick="alert(<?= json_encode(t('label.reject_reason','Reject reason: ') . (!empty($reject) ? $reject : '(사유 없음)')) ?>)"><?= t('btn.view_reject_reason','View reason') ?></button>
 
           <!-- ✅ 却下中 해제: 최소 초기화만 수행 (settle_chk=0, reject_* NULL) → 이후 사용자가 다시 ON 진행 -->
