@@ -101,6 +101,10 @@ if (!isset($content_file) && !$is_country_page) {
     <link rel="stylesheet" href="css/forms.css">
     <!-- Date picker (flatpickr) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <?php if (isset($is_country_page) && $is_country_page): ?>
+    <!-- Country Accordion Menu CSS -->
+    <link rel="stylesheet" href="css/pages/country_menu.css">
+    <?php endif; ?>
     <style>
         /* JP standard: compact inline date input */
         input.date-picker{width:170px; padding:8px; border-radius:8px; border:1px solid #d6dbe3;}
@@ -236,6 +240,7 @@ document.addEventListener('keydown', function(e){
             <?php if ($is_country_page): ?>
                 <?php
                     $region = $_GET['region'] ?? 'korea';
+                    $region = in_array($region, ['korea','japan'], true) ? $region : 'korea';
                     $current_page = basename($_SERVER['PHP_SELF']);
                     $is_active = fn(string $page, string $target_region) => 
                         ($current_page === $page && $region === $target_region) ? 'active' : '';
@@ -277,68 +282,6 @@ document.addEventListener('keydown', function(e){
                         </ul>
                     </li>
                 </ul>
-
-                <!-- Accordion Styles -->
-                <style>
-                    /* Country Header (Accordion Header) */
-                    .menu-sidebar .country-header {
-                        padding: 10px 12px;
-                        cursor: pointer;
-                        font-weight: 700;
-                        border-bottom: 1px solid #ddd;
-                        user-select: none;
-                    }
-                    .menu-sidebar .country-header:hover {
-                        background-color: #f5f5f5;
-                    }
-
-                    /* Submenu List (Hidden by default) */
-                    .menu-sidebar .country-submenu-list {
-                        display: none;
-                        list-style: none;
-                        padding: 0;
-                        margin: 0;
-                    }
-                    .menu-sidebar .country-submenu-list.open {
-                        display: block;
-                    }
-
-                    /* Submenu Items */
-                    .menu-sidebar .country-submenu {
-                        display: block;
-                        padding: 8px 12px 8px 32px;
-                        background: none !important;
-                        border: none !important;
-                        color: inherit;
-                        text-decoration: none;
-                        font-size: 14px;
-                        line-height: 1.2;
-                    }
-                    .menu-sidebar .country-submenu:hover {
-                        text-decoration: underline;
-                        background-color: #f9f9f9 !important;
-                    }
-                    .menu-sidebar .country-submenu.active {
-                        font-weight: 700;
-                        text-decoration: underline;
-                    }
-                </style>
-
-                <!-- Accordion Toggle Script -->
-                <script>
-                function toggleCountry(country) {
-                    const submenu = document.getElementById('submenu-' + country);
-                    const icon = document.getElementById('icon-' + country);
-                    
-                    if (submenu.classList.contains('open')) {
-                        submenu.classList.remove('open');
-                        icon.textContent = '▶';
-                    } else {
-                        submenu.classList.add('open');
-                        icon.textContent = '▼';
-                    }
-                }
-                </script>
 
                 <!-- Logout Button -->
                 <div class="logout-box">
@@ -452,5 +395,9 @@ document.addEventListener('keydown', function(e){
             document.getElementById('sidebar').classList.toggle('active');
         }
     </script>
+    <?php if (isset($is_country_page) && $is_country_page): ?>
+    <!-- Country Accordion Menu JS -->
+    <script src="js/pages/country_menu.js"></script>
+    <?php endif; ?>
 </body>
 </html>
