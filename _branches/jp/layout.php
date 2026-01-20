@@ -383,10 +383,11 @@ document.addEventListener('keydown', function(e){
             // Avoid double-init
             if (el._flatpickr) return;
             
-            // Force English locale for country filter bar
-            const isCountryFilter = el.closest('.country-filterbar');
-            let localeObj = null;
+            // Check if this is a country filter date input
+            const isCountryFilter = el.classList.contains('country-filter-date');
             
+            // Force English locale for country filter bar
+            let localeObj = null;
             if (!isCountryFilter) {
               // Use language-specific locale for non-country pages
               if (APP_LANG === 'ko' && flatpickr.l10ns && flatpickr.l10ns.ko) localeObj = flatpickr.l10ns.ko;
@@ -397,7 +398,19 @@ document.addEventListener('keydown', function(e){
             flatpickr(el, {
               dateFormat: "Y-m-d",
               allowInput: true,
-              locale: localeObj || "default"
+              locale: localeObj || "default",
+              onOpen: function(selectedDates, dateStr, instance) {
+                // Add scope class to country filter calendars
+                if (isCountryFilter) {
+                  instance.calendarContainer.classList.add('country-filter-fp');
+                }
+              },
+              onClose: function(selectedDates, dateStr, instance) {
+                // Optional: remove scope class on close
+                if (isCountryFilter) {
+                  instance.calendarContainer.classList.remove('country-filter-fp');
+                }
+              }
             });
           });
         }

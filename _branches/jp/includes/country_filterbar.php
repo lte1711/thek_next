@@ -33,13 +33,13 @@ $reset_url = $current_page . '?region=' . urlencode($region);
   <div class="filter-left">
     <div class="filter-item filter-date">
       <label>From</label>
-      <input type="text" class="date-picker" name="from" value="<?= htmlspecialchars($from_date) ?>" 
+      <input type="text" class="date-picker country-filter-date" name="from" value="<?= htmlspecialchars($from_date) ?>" 
              autocomplete="off" placeholder="YYYY-MM-DD" style="width:165px;">
     </div>
     
     <div class="filter-item filter-date">
       <label>To</label>
-      <input type="text" class="date-picker" name="to" value="<?= htmlspecialchars($to_date) ?>" 
+      <input type="text" class="date-picker country-filter-date" name="to" value="<?= htmlspecialchars($to_date) ?>" 
              autocomplete="off" placeholder="YYYY-MM-DD" style="width:165px;">
     </div>
     
