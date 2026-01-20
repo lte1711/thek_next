@@ -17,7 +17,9 @@ ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once __DIR__ . '/includes/i18n.php';
+if (!defined('I18N_LOADED')) {
+    require_once __DIR__ . '/includes/i18n.php';
+}
 // role 값 확인
 if (!isset($_SESSION['role'])) {
     error_log(t('error.login_required', 'Login required.'));

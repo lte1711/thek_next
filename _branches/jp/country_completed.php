@@ -11,6 +11,9 @@ if (!function_exists('t')) {
     }
 }
 
+// Prevent layout.php from loading i18n again
+define('I18N_LOADED', true);
+
 // Basic authentication check
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
