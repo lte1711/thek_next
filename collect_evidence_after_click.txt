@@ -1,0 +1,31 @@
+# OK 버튼 클릭 후 실행할 증거 수집 명령어
+
+# 증거 2: 로그 확인
+ssh -i C:\dennis\ai_test\thek-next.pem ubuntu@15.164.165.240 'sudo tail -n 200 /var/log/apache2/error.log | grep OK_SAVE | tail -n 20'
+[Tue Jan 20 11:06:01.284910 2026] [php:notice] [pid 1570] [client 112.187.121.78:63879] [OK_SAVE] HIT 2026-01-20T11:06:01+00:00 REQUEST_METHOD=POST, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:01.294927 2026] [php:notice] [pid 1570] [client 112.187.121.78:63879] [OK_SAVE] POST={"progressing_id":"685","user_id":"2182","tx_id":"1223","region":"korea"}, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:01.325740 2026] [php:notice] [pid 1570] [client 112.187.121.78:63879] [OK_SAVE] ready_trading SQL_ERR=, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:01.325775 2026] [php:notice] [pid 1570] [client 112.187.121.78:63879] [OK_SAVE] ready_trading affected_rows=0, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:01.392985 2026] [php:notice] [pid 1570] [client 112.187.121.78:63879] [OK_SAVE] EXCEPTION: Duplicate entry '2182-2026-01-20-xm,ultima' for key 'korea_progressing.uniq_user_date_pair', referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:29.395534 2026] [php:notice] [pid 1571] [client 112.187.121.78:60867] [OK_SAVE] HIT 2026-01-20T11:06:29+00:00 REQUEST_METHOD=POST, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:29.396384 2026] [php:notice] [pid 1571] [client 112.187.121.78:60867] [OK_SAVE] POST={"progressing_id":"685","user_id":"2182","tx_id":"1223","region":"korea"}, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:29.401601 2026] [php:notice] [pid 1571] [client 112.187.121.78:60867] [OK_SAVE] ready_trading SQL_ERR=, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:29.401619 2026] [php:notice] [pid 1571] [client 112.187.121.78:60867] [OK_SAVE] ready_trading affected_rows=0, referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+[Tue Jan 20 11:06:29.406993 2026] [php:notice] [pid 1571] [client 112.187.121.78:60867] [OK_SAVE] EXCEPTION: Duplicate entry '2182-2026-01-20-xm,ultima' for key 'korea_progressing.uniq_user_date_pair', referer: http://15.164.165.240/_branches/jp/country_ready.php?region=korea
+# 증거 3: DB 변화 확인 (after)
+ssh -i C:\dennis\ai_test\thek-next.pem ubuntu@15.164.165.240 'mysql -u thek_db_admin -pthek_pw_admin! thek_next_db_branch_jp < /tmp/check_db_before.sql'
+mysql: [Warning] Using a password on the command line interface can be insecure.
+info
+=== KOREA BEFORE TEST ===
+ready_total
+69
+ready_approved
+1
+prog_total
+77
+ready_id        user_id tx_id   status  username        external_done_chk
+151     2182    1223    approved        kr_inv_69       1
+150     2181    1222    ready   kr_inv_68       1
+149     2180    1221    ready   kr_inv_67       1
+148     2179    1220    ready   kr_inv_66       1
+147     2178    1219    ready   kr_inv_65       1
