@@ -53,7 +53,21 @@ $reason   = trim($_POST['reason'] ?? '');
 $region   = $_POST['region'] ?? 'korea';
 $allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) $region = 'korea';
+// ✅ Country mapping and validation
+$country_map = ['korea' => 'KR', 'japan' => 'JP'];
+$expected_country = $country_map[$region];
 
+// Verify user belongs to the requested region
+$stmt_country = $conn->prepare("SELECT country FROM users WHERE id=? LIMIT 1");
+$stmt_country->bind_param("i", $user_id);
+$stmt_country->execute();
+$user_row = $stmt_country->get_result()->fetch_assoc();
+$stmt_country->close();
+
+if (!$user_row || $user_row['country'] !== $expected_country) {
+    echo "❌ Invalid region for this user. Expected: {$expected_country}";
+    exit;
+}
 $table_ready    = $region . "_ready_trading";
 $table_progress = $region . "_progressing";
 
