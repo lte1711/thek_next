@@ -98,7 +98,10 @@ endif;
       <td>
         <!-- DEBUG: id=<?= $row['id'] ?>, reject='<?= htmlspecialchars($reject ?? 'NULL') ?>', reject_by='<?= htmlspecialchars($reject_by ?? 'NULL') ?>', empty(reject)=<?= empty($reject) ? 'true' : 'false' ?>, empty(reject_by)=<?= empty($reject_by) ? 'true' : 'false' ?> -->
         <?php if (!empty($reject) || !empty($reject_by)): ?>
-          <button class="confirm-btn" onclick="alert(<?= json_encode(t('label.reject_reason','Reject reason: ') . (!empty($reject) ? $reject : '(사유 없음)')) ?>)"><?= t('btn.view_reject_reason','View reason') ?></button>
+          <?php
+            $reject_msg = t('label.reject_reason','거절 사유: ') . (!empty($reject) ? $reject : '(사유 없음)');
+          ?>
+          <button class="confirm-btn" onclick='alert(<?= json_encode($reject_msg, JSON_UNESCAPED_UNICODE) ?>)'><?= t('btn.view_reject_reason','거절 사유 보기') ?></button>
 
           <!-- ✅ 却下中 해제: 최소 초기화만 수행 (settle_chk=0, reject_* NULL) → 이후 사용자가 다시 ON 진행 -->
           <form method="POST" action="reject_reset.php" style="display:inline; margin-left:6px;" onsubmit="return confirm(<?= json_encode(t('profit_share.confirm.reject_reset')) ?>);">
