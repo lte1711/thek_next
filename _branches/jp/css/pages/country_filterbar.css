@@ -52,6 +52,11 @@
     width: 165px;
 }
 
+/* Override flatpickr input width */
+.country-filterbar input.date-picker {
+    width: 165px !important;
+}
+
 /* Search input */
 .filter-item.filter-search input {
     width: 240px;

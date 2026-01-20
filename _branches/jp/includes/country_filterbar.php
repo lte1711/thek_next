@@ -33,14 +33,14 @@ $reset_url = $current_page . '?region=' . urlencode($region);
   <div class="filter-left">
     <div class="filter-item filter-date">
       <label>From</label>
-      <input type="text" class="js-date" name="from" value="<?= htmlspecialchars($from_date) ?>" 
-             autocomplete="off" inputmode="none" placeholder="YYYY-MM-DD">
+      <input type="text" class="date-picker" name="from" value="<?= htmlspecialchars($from_date) ?>" 
+             autocomplete="off" placeholder="YYYY-MM-DD" style="width:165px;">
     </div>
     
     <div class="filter-item filter-date">
       <label>To</label>
-      <input type="text" class="js-date" name="to" value="<?= htmlspecialchars($to_date) ?>" 
-             autocomplete="off" inputmode="none" placeholder="YYYY-MM-DD">
+      <input type="text" class="date-picker" name="to" value="<?= htmlspecialchars($to_date) ?>" 
+             autocomplete="off" placeholder="YYYY-MM-DD" style="width:165px;">
     </div>
     
     <div class="filter-item filter-search">
@@ -61,40 +61,3 @@ $reset_url = $current_page . '?region=' . urlencode($region);
     <?php endif; ?>
   </div>
 </form>
-
-<script>
-// Initialize custom date picker for filter bar
-(function(){
-  function attach(selector, mode) {
-    document.querySelectorAll(selector).forEach(input => {
-      if (input.dataset.pickerAttached) return;
-      input.dataset.pickerAttached = 'true';
-
-      const m = mode || 'date';
-      const fmt = m === 'month' ? 'yyyy-MM' : 'yyyy-MM-dd';
-
-      function show(input, m){
-        const val = input.value || new Date().toISOString().slice(0, m === 'month' ? 7 : 10);
-        input.type = m;
-        input.value = val;
-        input.showPicker?.();
-        setTimeout(() => input.focus(), 0);
-      }
-
-      input.type = 'text';
-      input.addEventListener('focus', ()=> show(input, m));
-      input.addEventListener('click', ()=> show(input, m));
-      input.addEventListener('keydown', (e)=>{
-        if (e.key.length === 1) e.preventDefault();
-      });
-    });
-  }
-
-  // Initialize date pickers on load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ()=> attach('input.js-date', 'date'));
-  } else {
-    attach('input.js-date', 'date');
-  }
-})();
-</script>
