@@ -48,6 +48,8 @@ require_once 'db_connect.php'; // $conn
 $region = $_POST['region'] ?? ($_GET['region'] ?? 'korea');
 $region = strtolower(trim($region));
 $region = preg_replace('/[^a-z0-9_]/', '', $region);
+$allowed_regions = ['korea', 'japan'];
+if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
 $table_ready = $region . '_ready_trading';
 $table_prog  = $region . '_progressing';

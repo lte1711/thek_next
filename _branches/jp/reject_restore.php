@@ -40,7 +40,7 @@ try {
         throw new Exception('Invalid ready_id');
     }
 
-    $allowed_regions = ['korea'];
+    $allowed_regions = ['korea', 'japan'];
     if (!in_array($region, $allowed_regions, true)) {
         throw new Exception('Invalid region');
     }

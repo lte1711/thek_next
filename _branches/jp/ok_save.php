@@ -73,7 +73,7 @@ try {
 
   if ($user_id<=0 || $tx_id<=0) throw new Exception('Invalid parameters');
 
-  $allowed_regions = ['korea'];
+  $allowed_regions = ['korea', 'japan'];
   if (!in_array($region, $allowed_regions, true)) throw new Exception('Invalid region');
 
   $table_ready = $region.'_ready_trading';

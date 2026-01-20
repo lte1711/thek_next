@@ -46,7 +46,7 @@ if (!$user_id) {
 
 // region (기본 korea)
 $region = $_GET['region'] ?? 'korea';
-$allowed_regions = ['korea']; // 필요 시 추가
+$allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) {
     http_response_code(400);
     die('invalid region');

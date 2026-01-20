@@ -51,7 +51,8 @@ $ready_id = (int)($_POST['ready_id'] ?? 0); // optional
 $tx_id    = (int)($_POST['tx_id'] ?? 0);    // required (or resolvable via ready_id)
 $reason   = trim($_POST['reason'] ?? '');
 $region   = $_POST['region'] ?? 'korea';
-if ($region !== 'korea') $region = 'korea';
+$allowed_regions = ['korea', 'japan'];
+if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
 $table_ready    = $region . "_ready_trading";
 $table_progress = $region . "_progressing";
