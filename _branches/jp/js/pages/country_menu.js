@@ -20,6 +20,7 @@ function toggleCountry(country) {
 // 페이지 로드시 region 기준으로 항상 열림 보장
 document.addEventListener('DOMContentLoaded', function () {
     const params = new URLSearchParams(window.location.search);
-    const region = params.get('region') || 'korea';
+    const regionRaw = params.get('region') || 'korea';
+    const region = (regionRaw === 'japan' || regionRaw === 'korea') ? regionRaw : 'korea';
     setCountryOpen(region);
 });
