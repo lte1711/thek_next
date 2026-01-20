@@ -27,7 +27,7 @@
 .menu-sidebar .country-submenu {
     display: block;
     padding: 8px 12px 8px 32px;
-    background: none !important;
+    background: transparent;
     border: none !important;
     color: inherit;
     text-decoration: none;
@@ -38,7 +38,51 @@
     text-decoration: underline;
     background-color: #f9f9f9 !important;
 }
+
+/* Active emphasis (stronger specificity + overrides) */
 .menu-sidebar .country-submenu.active {
+    background-color: rgba(255, 255, 255, 0.10) !important; /* dark sidebar용 */
+    border-left: 4px solid #2f6fed !important;
+    padding-left: 28px !important; /* 32px - 4px */
     font-weight: 700;
-    text-decoration: underline;
+    text-decoration: none !important;
+    box-sizing: border-box;
+}
+
+/* Keep active look even on hover */
+.menu-sidebar .country-submenu.active:hover {
+    background-color: rgba(255, 255, 255, 0.14) !important;
+    text-decoration: none !important;
+}
+
+/* Final override with maximum specificity */
+.menu-sidebar ul.country-submenu-list li a.country-submenu.active {
+    background-color: rgba(255, 255, 255, 0.10) !important;
+    border-left: 4px solid #2f6fed !important;
+    padding-left: 28px !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    box-sizing: border-box;
+}
+
+.menu-sidebar ul.country-submenu-list li a.country-submenu.active:hover {
+    background-color: rgba(255, 255, 255, 0.14) !important;
+    text-decoration: none !important;
+}
+
+/* FINAL ACTIVE OVERRIDE (match by #sidebar to avoid selector mismatch) */
+#sidebar a.country-submenu.active {
+    background-color: rgba(255, 255, 255, 0.10) !important;
+    border-left: 4px solid #2f6fed !important;
+    padding-left: 28px !important; /* 32px - 4px */
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    box-sizing: border-box;
+    display: block; /* 혹시 inline이면 배경이 안 보일 수 있으니 강제 */
+}
+
+/* active hover에서도 유지 */
+#sidebar a.country-submenu.active:hover {
+    background-color: rgba(255, 255, 255, 0.14) !important;
+    text-decoration: none !important;
 }

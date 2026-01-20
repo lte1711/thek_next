@@ -102,8 +102,8 @@ if (!isset($content_file) && !$is_country_page) {
     <!-- Date picker (flatpickr) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <?php if (isset($is_country_page) && $is_country_page): ?>
-    <!-- Country Accordion Menu CSS -->
-    <link rel="stylesheet" href="css/pages/country_menu.css">
+    <!-- Country Accordion Menu CSS (with cache-busting version) -->
+    <link rel="stylesheet" href="css/pages/country_menu.css?v=<?= filemtime(__DIR__ . '/css/pages/country_menu.css') ?>">
     <?php endif; ?>
     <style>
         /* JP standard: compact inline date input */
