@@ -80,11 +80,8 @@ $sql_count = "
   FROM {$table_ready} r
   JOIN users u ON u.id = r.user_id
   LEFT JOIN user_transactions t ON t.id = r.tx_id
-  WHERE (r.status IS NULL OR r.status = 'ready' OR r.status IN ('approved', 'rejected'))
-    AND (
-      (COALESCE(t.withdrawal_chk,0) = 0 AND COALESCE(t.settle_chk,0) <> 2)
-      OR r.status IN ('approved', 'rejected')
-    )
+  WHERE (r.status IS NULL OR r.status = 'ready')
+    AND (COALESCE(t.withdrawal_chk,0) = 0 AND COALESCE(t.settle_chk,0) <> 2)
 ";
 
 $total_count = 0;
@@ -140,11 +137,8 @@ $sql_ready = "
   LEFT JOIN user_transactions t ON t.id = r.tx_id
   LEFT JOIN user_details d ON d.user_id = r.user_id
 
-  WHERE (r.status IS NULL OR r.status = 'ready' OR r.status IN ('approved', 'rejected'))
-    AND (
-      (COALESCE(t.withdrawal_chk,0) = 0 AND COALESCE(t.settle_chk,0) <> 2)
-      OR r.status IN ('approved', 'rejected')
-    )
+  WHERE (r.status IS NULL OR r.status = 'ready')
+    AND (COALESCE(t.withdrawal_chk,0) = 0 AND COALESCE(t.settle_chk,0) <> 2)
 
   ORDER BY r.tx_date DESC, r.id DESC
   LIMIT {$per_page} OFFSET {$offset}

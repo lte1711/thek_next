@@ -95,7 +95,7 @@ $sql_count = "
       AND COALESCE(t.settle_chk,0) = 1
       AND COALESCE(t.dividend_chk,0) = 1
     )
-    OR r.status IN ('rejected','rejecting')
+    OR r.status IN ('approved','rejected','rejecting')
     OR COALESCE(t.settle_chk,0) = 2
   )
   AND r.id IS NOT NULL
@@ -158,7 +158,7 @@ $sql_completed = "
         AND COALESCE(t.settle_chk,0) = 1
         AND COALESCE(t.dividend_chk,0) = 1
       )
-      OR r.status IN ('rejected','rejecting')
+      OR r.status IN ('approved','rejected','rejecting')
       OR COALESCE(t.settle_chk,0) = 2
     )
     -- ✅ Region filter: only show if registered in this region's ready_trading
