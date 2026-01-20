@@ -39,10 +39,6 @@ $region = $_GET['region'] ?? 'korea';
 $allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
-// Country mapping for users.country filter
-$country_map = ['korea' => 'KR', 'japan' => 'JP'];
-$country = $country_map[$region];
-
 $table_ready    = $region . "_ready_trading";
 $table_progress = $region . "_progressing";
 
@@ -106,8 +102,7 @@ $sql_completed = "
   ) pm ON pm.user_id = t.user_id AND pm.tx_date = DATE(t.tx_date)
   LEFT JOIN {$table_progress} p ON p.id = pm.max_pid
 
-	  WHERE u.country = '{$country}'
-    AND (
+	  WHERE (
       (
         COALESCE(t.deposit_chk,0) = 1
         AND COALESCE(t.withdrawal_chk,0) = 1

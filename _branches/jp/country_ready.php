@@ -40,10 +40,6 @@ $region = $_GET['region'] ?? 'korea';
 $allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
-// Country mapping for users.country filter
-$country_map = ['korea' => 'KR', 'japan' => 'JP'];
-$country = $country_map[$region];
-
 $table_ready    = $region . "_ready_trading";
 $table_progress = $region . "_progressing";
 
@@ -115,12 +111,11 @@ $sql_ready = "
   LEFT JOIN user_details d ON d.user_id = t.user_id
   LEFT JOIN users u ON u.id = t.user_id
 
-  WHERE u.country = '{$country}'
-    AND COALESCE(t.withdrawal_chk,0) = 0
+  WHERE COALESCE(t.withdrawal_chk,0) = 0
     -- Ready only: never show completed/rejected rows (including settlement rejects)
     AND COALESCE(t.settle_chk,0) <> 2
     AND (COALESCE(t.reject_by,0) = 0)
-    -- ✅ Region filter: only show if registered in this region's ready_trading with ready status
+    -- ✅ Region filter: only show if registered in this region's ready_trading table
     AND r.id IS NOT NULL
     AND (r.status IS NULL OR r.status='ready')
 

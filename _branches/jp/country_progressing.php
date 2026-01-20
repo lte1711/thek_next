@@ -39,10 +39,6 @@ $region = $_GET['region'] ?? 'korea';
 $allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
-// Country mapping for users.country filter
-$country_map = ['korea' => 'KR', 'japan' => 'JP'];
-$country = $country_map[$region];
-
 $table_progress = $region . "_progressing";
 $table_ready = $region . "_ready_trading";
 
@@ -64,9 +60,7 @@ $sync_sql = "
     t.reject_reason
   FROM user_transactions t
   INNER JOIN {$table_ready} r ON r.tx_id = t.id AND r.user_id = t.user_id
-  INNER JOIN users u ON u.id = t.user_id
-  WHERE u.country = '{$country}'
-    AND COALESCE(t.withdrawal_chk,0) = 0
+  WHERE COALESCE(t.withdrawal_chk,0) = 0
         AND NOT EXISTS (
       SELECT 1
       FROM {$table_progress} p
@@ -110,8 +104,7 @@ $sql_progress = "
     GROUP BY user_id, DATE(tx_date)
   ) m ON m.user_id = p.user_id AND m.tx_date = p.tx_date
   LEFT JOIN user_transactions t ON t.id = m.max_id
-  WHERE u.country = '{$country}'
-    AND NOT (
+  WHERE NOT (
     (
       COALESCE(t.deposit_chk,0) = 1
       AND COALESCE(t.withdrawal_chk,0) = 1
