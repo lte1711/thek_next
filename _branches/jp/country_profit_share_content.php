@@ -1,4 +1,6 @@
-<h2>P / S - <?= t('title.settlement.partner_daily','Partner Daily Settlement') ?></h2>
+<div class="country-page-header">
+  <h1 class="country-page-title"><?= ucfirst($region) ?> - P / S</h1>
+</div>
 
 <div style="margin:12px 0 18px;">
   <form method="GET" class="form-inline" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">

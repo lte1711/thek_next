@@ -1,5 +1,7 @@
 <!-- ✅ Completed Transactions (C / L) -->
-<h2><?= ucfirst($region) ?> - Completed Transactions (C / L)</h2>
+<div class="country-page-header">
+  <h1 class="country-page-title"><?= ucfirst($region) ?> - C / L</h1>
+</div>
 
 <?php if (!isset($result_completed) || !$result_completed): ?>
   <div style="padding:10px 0; color:#666;">No completed transactions.</div>

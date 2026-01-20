@@ -1,4 +1,6 @@
-<h2><?= ucfirst($region) ?> - Progressing</h2>
+<div class="country-page-header">
+  <h1 class="country-page-title"><?= ucfirst($region) ?> - Progressing</h1>
+</div>
 
 <style>
   .status-ok { color:#22c55e; font-weight:700; }

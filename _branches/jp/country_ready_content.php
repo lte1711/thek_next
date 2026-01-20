@@ -1,4 +1,6 @@
-<h2><?= ucfirst($region) ?> - Ready for Trading</h2>
+<div class="country-page-header">
+  <h1 class="country-page-title"><?= ucfirst($region) ?> - Ready for Trading</h1>
+</div>
 
 <!-- ✅ 최소 CSS 추가 (모달이 제대로 보이도록) -->
 <style>

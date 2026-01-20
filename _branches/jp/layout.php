@@ -104,6 +104,8 @@ if (!isset($content_file) && !$is_country_page) {
     <?php if (isset($is_country_page) && $is_country_page): ?>
     <!-- Country Accordion Menu CSS (with cache-busting version) -->
     <link rel="stylesheet" href="css/pages/country_menu.css?v=<?= filemtime(__DIR__ . '/css/pages/country_menu.css') ?>">
+    <!-- Country Common Styles -->
+    <link rel="stylesheet" href="css/pages/country_common.css?v=<?= filemtime(__DIR__ . '/css/pages/country_common.css') ?>">
     <?php endif; ?>
     <style>
         /* JP standard: compact inline date input */
