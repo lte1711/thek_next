@@ -36,7 +36,8 @@ if (!($username === 'Zayne' || $role === 'superadmin')) {
 include 'db_connect.php';
 
 $region = $_GET['region'] ?? 'korea';
-if ($region !== 'korea') $region = 'korea';
+$allowed_regions = ['korea', 'japan'];
+if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
 // ✅ (P / S) Partner Daily Settlement 위젯: 기존 country.php 로직 재사용
 $partner_date = $_GET['partner_date'] ?? date('Y-m-d', strtotime('-1 day'));

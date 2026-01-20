@@ -36,7 +36,8 @@ if (!($username === 'Zayne' || $role === 'superadmin')) {
 include 'db_connect.php';
 
 $region = $_GET['region'] ?? 'korea';
-if ($region !== 'korea') $region = 'korea';
+$allowed_regions = ['korea', 'japan'];
+if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
 $table_ready    = $region . "_ready_trading";
 $table_progress = $region . "_progressing";
