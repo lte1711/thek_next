@@ -40,6 +40,7 @@ $allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
 $table_progress = $region . "_progressing";
+$table_ready = $region . "_ready_trading";
 
 // ✅ 자동 동기화 (Ready → Progressing 행 생성) : 기존 로직 유지
 $sync_sql = "
@@ -58,6 +59,7 @@ $sync_sql = "
     t.settled_date,
     t.reject_reason
   FROM user_transactions t
+  INNER JOIN {$table_ready} r ON r.tx_id = t.id AND r.user_id = t.user_id
   WHERE COALESCE(t.withdrawal_chk,0) = 0
         AND NOT EXISTS (
       SELECT 1
