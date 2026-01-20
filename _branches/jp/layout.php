@@ -239,48 +239,50 @@ document.addEventListener('keydown', function(e){
         <nav class="menu-sidebar" id="sidebar">
             <?php if ($is_country_page): ?>
                 <?php
+                    // Country definitions (extensible)
+                    $countries = [
+                        'korea' => 'KOREA',
+                        'japan' => 'JAPAN',
+                        // Future additions:
+                        // 'malaysia' => 'MALAYSIA',
+                        // 'vietnam'  => 'VIETNAM',
+                    ];
+
+                    // Submenu definitions
+                    $submenus = [
+                        ['file' => 'country_ready.php',        'label' => 'Ready'],
+                        ['file' => 'country_progressing.php',  'label' => 'Progressing'],
+                        ['file' => 'country_completed.php',    'label' => 'C / L'],
+                        ['file' => 'country_profit_share.php', 'label' => 'P / S'],
+                    ];
+
+                    // Region validation (whitelist)
                     $region = $_GET['region'] ?? 'korea';
-                    $region = in_array($region, ['korea','japan'], true) ? $region : 'korea';
+                    $region = array_key_exists($region, $countries) ? $region : 'korea';
+                    
                     $current_page = basename($_SERVER['PHP_SELF']);
                     $is_active = fn(string $page, string $target_region) => 
                         ($current_page === $page && $region === $target_region) ? 'active' : '';
                 ?>
 
+                <!-- Pass country regions to JavaScript -->
+                <script>window.COUNTRY_REGIONS = <?= json_encode(array_keys($countries)) ?>;</script>
+
                 <!-- Country Accordion Menu -->
                 <ul class="menu-list">
-                    <!-- KOREA -->
+                    <?php foreach ($countries as $code => $label): ?>
                     <li>
-                        <div class="country-header" onclick="toggleCountry('korea')">
-                            <span id="icon-korea"><?= $region === 'korea' ? '▼' : '▶' ?></span> KOREA
+                        <div class="country-header" onclick="toggleCountry('<?= htmlspecialchars($code) ?>')">
+                            <span id="icon-<?= htmlspecialchars($code) ?>"><?= $region === $code ? '▼' : '▶' ?></span> <?= htmlspecialchars($label) ?>
                         </div>
-                        <ul class="country-submenu-list <?= $region === 'korea' ? 'open' : '' ?>" id="submenu-korea">
-                            <li><a class="country-submenu <?= $is_active('country_ready.php', 'korea') ?>" 
-                                   href="country_ready.php?region=korea">Ready</a></li>
-                            <li><a class="country-submenu <?= $is_active('country_progressing.php', 'korea') ?>" 
-                                   href="country_progressing.php?region=korea">Progressing</a></li>
-                            <li><a class="country-submenu <?= $is_active('country_completed.php', 'korea') ?>" 
-                                   href="country_completed.php?region=korea">C / L</a></li>
-                            <li><a class="country-submenu <?= $is_active('country_profit_share.php', 'korea') ?>" 
-                                   href="country_profit_share.php?region=korea">P / S</a></li>
+                        <ul class="country-submenu-list <?= $region === $code ? 'open' : '' ?>" id="submenu-<?= htmlspecialchars($code) ?>">
+                            <?php foreach ($submenus as $menu): ?>
+                            <li><a class="country-submenu <?= $is_active($menu['file'], $code) ?>" 
+                                   href="<?= htmlspecialchars($menu['file']) ?>?region=<?= htmlspecialchars($code) ?>"><?= htmlspecialchars($menu['label']) ?></a></li>
+                            <?php endforeach; ?>
                         </ul>
                     </li>
-
-                    <!-- JAPAN -->
-                    <li>
-                        <div class="country-header" onclick="toggleCountry('japan')">
-                            <span id="icon-japan"><?= $region === 'japan' ? '▼' : '▶' ?></span> JAPAN
-                        </div>
-                        <ul class="country-submenu-list <?= $region === 'japan' ? 'open' : '' ?>" id="submenu-japan">
-                            <li><a class="country-submenu <?= $is_active('country_ready.php', 'japan') ?>" 
-                                   href="country_ready.php?region=japan">Ready</a></li>
-                            <li><a class="country-submenu <?= $is_active('country_progressing.php', 'japan') ?>" 
-                                   href="country_progressing.php?region=japan">Progressing</a></li>
-                            <li><a class="country-submenu <?= $is_active('country_completed.php', 'japan') ?>" 
-                                   href="country_completed.php?region=japan">C / L</a></li>
-                            <li><a class="country-submenu <?= $is_active('country_profit_share.php', 'japan') ?>" 
-                                   href="country_profit_share.php?region=japan">P / S</a></li>
-                        </ul>
-                    </li>
+                    <?php endforeach; ?>
                 </ul>
 
                 <!-- Logout Button -->

@@ -21,6 +21,10 @@ function toggleCountry(country) {
 document.addEventListener('DOMContentLoaded', function () {
     const params = new URLSearchParams(window.location.search);
     const regionRaw = params.get('region') || 'korea';
-    const region = (regionRaw === 'japan' || regionRaw === 'korea') ? regionRaw : 'korea';
+    
+    // Use allowed countries from PHP (if available), fallback to hardcoded
+    const allowed = window.COUNTRY_REGIONS || ['korea', 'japan'];
+    const region = allowed.includes(regionRaw) ? regionRaw : 'korea';
+    
     setCountryOpen(region);
 });
