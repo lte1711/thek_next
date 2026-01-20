@@ -382,10 +382,18 @@ document.addEventListener('keydown', function(e){
           document.querySelectorAll('input.date-picker').forEach(function(el){
             // Avoid double-init
             if (el._flatpickr) return;
+            
+            // Force English locale for country filter bar
+            const isCountryFilter = el.closest('.country-filterbar');
             let localeObj = null;
-            if (APP_LANG === 'ko' && flatpickr.l10ns && flatpickr.l10ns.ko) localeObj = flatpickr.l10ns.ko;
-            else if (APP_LANG === 'ja' && flatpickr.l10ns && flatpickr.l10ns.ja) localeObj = flatpickr.l10ns.ja;
-            // en -> default
+            
+            if (!isCountryFilter) {
+              // Use language-specific locale for non-country pages
+              if (APP_LANG === 'ko' && flatpickr.l10ns && flatpickr.l10ns.ko) localeObj = flatpickr.l10ns.ko;
+              else if (APP_LANG === 'ja' && flatpickr.l10ns && flatpickr.l10ns.ja) localeObj = flatpickr.l10ns.ja;
+            }
+            // Country filter bar always uses English (default)
+            
             flatpickr(el, {
               dateFormat: "Y-m-d",
               allowInput: true,

@@ -57,6 +57,20 @@
     width: 165px !important;
 }
 
+/* Fix flatpickr calendar positioning and z-index */
+.flatpickr-calendar {
+    z-index: 9999 !important;
+}
+
+/* Ensure month/year header is not clipped */
+.flatpickr-months {
+    overflow: visible !important;
+}
+
+.flatpickr-month {
+    overflow: visible !important;
+}
+
 /* Search input */
 .filter-item.filter-search input {
     width: 240px;
