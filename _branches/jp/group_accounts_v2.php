@@ -28,6 +28,13 @@ if (!function_exists('t')) {
     if (file_exists($i18n)) require_once $i18n;
 }
 
+// DEBUG: Language context check
+echo "<div style='padding:6px 10px;background:#ffeeaa;border:1px solid #ccaa00;margin:10px 0;'>
+DEBUG LANG: GET=" . htmlspecialchars($_GET['lang'] ?? 'NULL') .
+" / SESSION=" . htmlspecialchars($_SESSION['lang'] ?? 'NULL') .
+" / CURRENT=" . htmlspecialchars($lang ?? 'NULL') .
+"</div>";
+
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");

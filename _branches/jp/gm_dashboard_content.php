@@ -1,7 +1,7 @@
 <?php
 include 'db_connect.php';
 include 'includes/gm_dashboard_ui.php';  // ✅ 공통 CSS include
-?>
+
 $country_profit = [];
 $sql = "SELECT u.country, SUM(t.profit_loss) AS total_profit
         FROM user_transactions t
