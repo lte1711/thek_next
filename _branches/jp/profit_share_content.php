@@ -104,7 +104,7 @@ endif;
           <button class="confirm-btn" onclick='alert(<?= json_encode($reject_msg, JSON_UNESCAPED_UNICODE) ?>)'><?= t('btn.view_reject_reason','거절 사유 보기') ?></button>
 
           <!-- ✅ 却下中 해제: 최소 초기화만 수행 (settle_chk=0, reject_* NULL) → 이후 사용자가 다시 ON 진행 -->
-          <form method="POST" action="reject_reset.php" style="display:inline; margin-left:6px;" onsubmit="return confirm(<?= json_encode(t('profit_share.confirm.reject_reset')) ?>);">
+          <form method="POST" action="reject_reset.php" style="display:inline; margin-left:6px;" onsubmit='return confirm(<?= json_encode(t("profit_share.confirm.reject_reset"), JSON_UNESCAPED_UNICODE) ?>)'>
             <input type="hidden" name="id" value="<?= (int)$row['id'] ?>">
             <input type="hidden" name="user_id" value="<?= (int)$user_id ?>">
             <input type="hidden" name="region" value="<?= htmlspecialchars($region ?? 'korea') ?>">
