@@ -39,8 +39,22 @@ $region = $_GET['region'] ?? 'korea';
 $allowed_regions = ['korea', 'japan'];
 if (!in_array($region, $allowed_regions, true)) $region = 'korea';
 
+// ✅ 페이지네이션 변수 통일 (20개 단위)
+$per_page = 20;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $per_page;
+
 $table_ready    = $region . "_ready_trading";
 $table_progress = $region . "_progressing";
+
+// ✅ base_query: 필터 파라미터 유지
+$qs = [];
+$qs['region'] = $region;
+if (!empty($_GET['from'])) $qs['from'] = $_GET['from'];
+if (!empty($_GET['to'])) $qs['to'] = $_GET['to'];
+if (!empty($_GET['q'])) $qs['q'] = $_GET['q'];
+$base_query = http_build_query($qs);
 
 function columnExists(mysqli $conn, string $table, string $column): bool {
     $sql = "SELECT COUNT(*) AS cnt
@@ -62,6 +76,41 @@ $has_tx_id = columnExists($conn, $table_ready, 'tx_id');
 $join_ready = $has_tx_id
   ? "LEFT JOIN {$table_ready} r ON r.tx_id = t.id AND r.user_id = t.user_id"
   : "LEFT JOIN {$table_ready} r ON r.user_id = t.user_id AND r.tx_date = DATE(t.tx_date)";
+
+// ✅ COUNT 쿼리
+$sql_count = "
+  SELECT COUNT(*) AS cnt
+  FROM user_transactions t
+  {$join_ready}
+  LEFT JOIN (
+    SELECT user_id, tx_date, MAX(id) AS max_pid
+    FROM {$table_progress}
+    GROUP BY user_id, tx_date
+  ) pm ON pm.user_id = t.user_id AND pm.tx_date = DATE(t.tx_date)
+  LEFT JOIN {$table_progress} p ON p.id = pm.max_pid
+  WHERE (
+    (
+      COALESCE(t.deposit_chk,0) = 1
+      AND COALESCE(t.withdrawal_chk,0) = 1
+      AND COALESCE(t.settle_chk,0) = 1
+      AND COALESCE(t.dividend_chk,0) = 1
+    )
+    OR r.status IN ('rejected','rejecting')
+    OR COALESCE(t.settle_chk,0) = 2
+  )
+  AND r.id IS NOT NULL
+";
+
+$total_count = 0;
+$total_pages = 1;
+$res_cnt = mysqli_query($conn, $sql_count);
+if ($res_cnt) {
+    $row_cnt = mysqli_fetch_assoc($res_cnt);
+    $total_count = (int)($row_cnt['cnt'] ?? 0);
+}
+$total_pages = max(1, (int)ceil($total_count / $per_page));
+if ($page > $total_pages) $page = $total_pages;
+$offset = ($page - 1) * $per_page;
 
 // ✅ Completed: approved + rejected (C/L)
 $sql_completed = "
@@ -116,7 +165,7 @@ $sql_completed = "
     AND r.id IS NOT NULL
 
   ORDER BY DATE(t.tx_date) DESC, t.id DESC
-  LIMIT 200
+  LIMIT {$per_page} OFFSET {$offset}
 ";
 
 $result_completed = mysqli_query($conn, $sql_completed);

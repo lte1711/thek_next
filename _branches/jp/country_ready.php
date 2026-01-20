@@ -60,21 +60,51 @@ function columnExists(mysqli $conn, string $table, string $column): bool {
 
 $has_tx_id = columnExists($conn, $table_ready, 'tx_id');
 
-$ready_per_page = 50;
-$ready_page = isset($_GET['ready_page']) ? max(1, (int)$_GET['ready_page']) : 1;
-$ready_offset = ($ready_page - 1) * $ready_per_page;
+// ✅ 페이지네이션 변수 통일 (20개 단위)
+$per_page = 20;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $per_page;
 
-$ready_join = $has_tx_id
-  ? "LEFT JOIN {$table_ready} r ON r.tx_id = t.id AND r.user_id = t.user_id"
-  : "LEFT JOIN {$table_ready} r ON r.user_id = t.user_id AND r.tx_date = DATE(t.tx_date)";
+// ✅ base_query: 필터 파라미터 유지
+$qs = [];
+$qs['region'] = $region;
+if (!empty($_GET['from'])) $qs['from'] = $_GET['from'];
+if (!empty($_GET['to'])) $qs['to'] = $_GET['to'];
+if (!empty($_GET['q'])) $qs['q'] = $_GET['q'];
+$base_query = http_build_query($qs);
 
+// ✅ COUNT 쿼리 (Ready 테이블 메인)
+$sql_count = "
+  SELECT COUNT(*) AS cnt
+  FROM {$table_ready} r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN user_transactions t ON t.id = r.tx_id
+  WHERE (r.status IS NULL OR r.status = 'ready' OR r.status IN ('approved', 'rejected'))
+    AND (
+      (COALESCE(t.withdrawal_chk,0) = 0 AND COALESCE(t.settle_chk,0) <> 2)
+      OR r.status IN ('approved', 'rejected')
+    )
+";
+
+$total_count = 0;
+$total_pages = 1;
+$res_cnt = mysqli_query($conn, $sql_count);
+if ($res_cnt) {
+    $row_cnt = mysqli_fetch_assoc($res_cnt);
+    $total_count = (int)($row_cnt['cnt'] ?? 0);
+}
+$total_pages = max(1, (int)ceil($total_count / $per_page));
+if ($page > $total_pages) $page = $total_pages;
+$offset = ($page - 1) * $per_page;
+
+// ✅ Ready 목록 쿼리 (Ready 테이블 메인으로 리팩터링)
 $sql_ready = "
   SELECT
-    t.id      AS tx_id,
-    t.user_id AS user_id,
-    DATE(t.tx_date) AS tx_date,
-
     r.id     AS ready_id,
+    r.user_id AS user_id,
+    r.tx_id  AS tx_id,
+    r.tx_date AS tx_date,
     r.status AS status,
 
     u.username,
@@ -92,36 +122,32 @@ $sql_ready = "
       t.settled_date,
       (SELECT MAX(p.settled_date)
          FROM {$table_progress} p
-        WHERE p.user_id = t.user_id AND p.tx_date = DATE(t.tx_date))
-    ) AS settled_date
+        WHERE p.user_id = r.user_id AND p.tx_date = r.tx_date)
+    ) AS settled_date,
 
-    ,
     -- ✅ progressing_id: OK 처리 시 무조건 이 ID로 업데이트 (중복 방지)
     (
       SELECT p2.id
       FROM {$table_progress} p2
-      WHERE p2.user_id = t.user_id
-        AND p2.tx_date = DATE(t.tx_date)
+      WHERE p2.user_id = r.user_id
+        AND p2.tx_date = r.tx_date
       ORDER BY (p2.pair='xm,ultima') DESC, p2.deposit_status DESC, p2.id DESC
       LIMIT 1
     ) AS progressing_id
 
-  FROM user_transactions t
-  {$ready_join}
-  LEFT JOIN user_details d ON d.user_id = t.user_id
-  LEFT JOIN users u ON u.id = t.user_id
+  FROM {$table_ready} r
+  JOIN users u ON u.id = r.user_id
+  LEFT JOIN user_transactions t ON t.id = r.tx_id
+  LEFT JOIN user_details d ON d.user_id = r.user_id
 
-  WHERE r.id IS NOT NULL
-    -- ✅ Region filter: only show if registered in this region's ready_trading table
+  WHERE (r.status IS NULL OR r.status = 'ready' OR r.status IN ('approved', 'rejected'))
     AND (
-      -- Show pending transactions (not yet withdrawn)
       (COALESCE(t.withdrawal_chk,0) = 0 AND COALESCE(t.settle_chk,0) <> 2)
-      -- Also show approved/rejected for review
       OR r.status IN ('approved', 'rejected')
     )
 
-  ORDER BY DATE(t.tx_date) DESC, t.id DESC
-  LIMIT {$ready_per_page} OFFSET {$ready_offset}
+  ORDER BY r.tx_date DESC, r.id DESC
+  LIMIT {$per_page} OFFSET {$offset}
 ";
 
 $result_ready = mysqli_query($conn, $sql_ready);

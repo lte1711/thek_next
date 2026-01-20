@@ -75,9 +75,57 @@ if (!$sync_res) {
     error_log("country_progressing.php Sync INSERT Error: " . mysqli_error($conn));
 }
 
-$progress_per_page = 50;
-$progress_page = isset($_GET['progress_page']) ? max(1, (int)$_GET['progress_page']) : 1;
-$progress_offset = ($progress_page - 1) * $progress_per_page;
+// ✅ 페이지네이션 변수 통일 (20개 단위)
+$per_page = 20;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $per_page;
+
+// ✅ base_query: 필터 파라미터 유지
+$qs = [];
+$qs['region'] = $region;
+if (!empty($_GET['from'])) $qs['from'] = $_GET['from'];
+if (!empty($_GET['to'])) $qs['to'] = $_GET['to'];
+if (!empty($_GET['q'])) $qs['q'] = $_GET['q'];
+$base_query = http_build_query($qs);
+
+// ✅ COUNT 쿼리
+$sql_count = "
+  SELECT COUNT(*) AS cnt
+  FROM {$table_progress} p
+  JOIN users u ON u.id = p.user_id
+  LEFT JOIN (
+    SELECT user_id, DATE(tx_date) AS tx_date, MAX(id) AS max_id
+    FROM user_transactions
+    GROUP BY user_id, DATE(tx_date)
+  ) m ON m.user_id = p.user_id AND m.tx_date = p.tx_date
+  LEFT JOIN user_transactions t ON t.id = m.max_id
+  WHERE NOT (
+    (
+      COALESCE(t.deposit_chk,0) = 1
+      AND COALESCE(t.withdrawal_chk,0) = 1
+      AND COALESCE(t.settle_chk,0) = 1
+      AND COALESCE(t.dividend_chk,0) = 1
+    )
+    OR (
+      COALESCE(p.deposit_status,'') = 'V'
+      AND COALESCE(p.withdrawal_status,'') = 'V'
+      AND COALESCE(p.profit_loss,'') = 'V'
+    )
+  )
+  AND COALESCE(t.settle_chk,0) <> 2
+";
+
+$total_count = 0;
+$total_pages = 1;
+$res_cnt = mysqli_query($conn, $sql_count);
+if ($res_cnt) {
+    $row_cnt = mysqli_fetch_assoc($res_cnt);
+    $total_count = (int)($row_cnt['cnt'] ?? 0);
+}
+$total_pages = max(1, (int)ceil($total_count / $per_page));
+if ($page > $total_pages) $page = $total_pages;
+$offset = ($page - 1) * $per_page;
 
 $sql_progress = "
   SELECT
@@ -120,7 +168,7 @@ $sql_progress = "
     AND COALESCE(t.settle_chk,0) <> 2
 
   ORDER BY p.tx_date DESC
-  LIMIT {$progress_per_page} OFFSET {$progress_offset}
+  LIMIT {$per_page} OFFSET {$offset}
 ";
 
 $result_progress = mysqli_query($conn, $sql_progress);

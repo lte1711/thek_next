@@ -67,6 +67,9 @@ if (!empty($_GET['partner_date'])) {
     <?php endif; ?>
 
   </table>
+
+  <?php include __DIR__ . '/includes/country_pagination.php'; ?>
+
   </div>
 </div>
 

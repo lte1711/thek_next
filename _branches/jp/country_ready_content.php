@@ -113,6 +113,9 @@ $search_placeholder = 'Username / Pair / Broker';
     <?php endwhile; ?>
   <?php endif; ?>
 </table>
+
+<?php include __DIR__ . '/includes/country_pagination.php'; ?>
+
 </div>
 
 <!-- Reject Reason Modal -->
