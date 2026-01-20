@@ -62,7 +62,7 @@ endif;
       $withdrawal = $row['withdrawal_chk'] ?? 0;
       $dividend   = $row['dividend_chk'];
       $settled    = $row['settle_chk'];
-      $reject     = $row['reject_reason'];
+      $reject     = $row['reject_reason'] ?? null;
       $reject_by  = $row['reject_by'] ?? null;
 
       $all_three = ($deposit == 1 && $external == 1 && $withdrawal == 1 && $dividend == 1);
@@ -96,6 +96,7 @@ endif;
       <td><?= ($withdrawal == 1) ? '<span class="check">✅</span>' : ((int)$external===1 ? '<a href="investor_withdrawal.php?user_id='.$user_id.'&id='.$row['id'].'" class="fail">❌</a>' : '<span class="muted">⏳</span>') ?></td>
       <td><?= ($dividend == 1) ? '<span class="check">✅</span>' : ((int)$external===1 ? '<a href="investor_profit_share.php?user_id='.$user_id.'&id='.$row['id'].'" class="fail">❌</a>' : '<span class="muted">⏳</span>') ?></td>
       <td>
+        <!-- DEBUG: reject=<?= var_export($reject, true) ?>, reject_by=<?= var_export($reject_by, true) ?> -->
         <?php if (!empty($reject) || !empty($reject_by)): ?>
           <button class="confirm-btn" onclick="alert(<?= json_encode(t('label.reject_reason','Reject reason: ') . (!empty($reject) ? $reject : '(사유 없음)')) ?>)"><?= t('btn.view_reject_reason','View reason') ?></button>
 
