@@ -112,7 +112,7 @@ $sql_completed = "
       OR r.status IN ('rejected','rejecting')
       OR COALESCE(t.settle_chk,0) = 2
     )
-    -- ✅ Region filter: only show transactions in this region's ready_trading
+    -- ✅ Region filter: only show if registered in this region's ready_trading
     AND r.id IS NOT NULL
 
   ORDER BY DATE(t.tx_date) DESC, t.id DESC

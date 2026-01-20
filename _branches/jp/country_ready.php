@@ -115,9 +115,9 @@ $sql_ready = "
     -- Ready only: never show completed/rejected rows (including settlement rejects)
     AND COALESCE(t.settle_chk,0) <> 2
     AND (COALESCE(t.reject_by,0) = 0)
-    AND (r.status IS NULL OR r.status='ready')
-    -- ✅ Region filter: only show transactions registered in this region's ready_trading table
+    -- ✅ Region filter: only show if registered in this region's ready_trading with ready status
     AND r.id IS NOT NULL
+    AND (r.status IS NULL OR r.status='ready')
 
   ORDER BY DATE(t.tx_date) DESC, t.id DESC
   LIMIT {$ready_per_page} OFFSET {$ready_offset}
