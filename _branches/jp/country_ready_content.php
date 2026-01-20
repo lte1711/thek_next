@@ -188,8 +188,7 @@ function submitReject() {
   .then(msg => {
     alert(msg);
     closeRejectModal();
-    // ✅ 분리 구조: 완료 리스트로 이동
-    location.href = `country_completed.php?region=${encodeURIComponent(REGION)}`;
+    window.location.reload();
   })
   .catch(err => alert(<?= json_encode(t('error.occurred_prefix','Error occurred: ')) ?> + err));
 }
@@ -210,8 +209,7 @@ function submitOk(progressingId, userId, txId){
     if (!data) { alert('Server response: ' + t); return; }
     alert(data.message || (data.success ? <?= json_encode(t('msg.ok_processed','OK processed successfully')) ?> : <?= json_encode(t('error.process_failed','Process failed')) ?>));
     if (data.success) {
-      // ✅ 분리 구조: 완료 리스트로 이동
-      location.href = `country_completed.php?region=${encodeURIComponent(REGION)}`;
+      window.location.reload();
     }
   })
   .catch(err => alert(<?= json_encode(t('error.occurred_prefix','Error occurred: ')) ?> + err));
