@@ -1,5 +1,9 @@
+<?php
+$region = $_GET['region'] ?? 'korea';
+$countryLabel = ($region === 'japan') ? 'Japan' : 'Korea';
+?>
 <div class="country-page-header">
-  <h1 class="country-page-title"><?= ucfirst($region) ?> - Ready for Trading</h1>
+  <h1 class="country-page-title"><?= $countryLabel ?> - Ready for Trading</h1>
 </div>
 
 <!-- ✅ 최소 CSS 추가 (모달이 제대로 보이도록) -->

@@ -1,5 +1,9 @@
+<?php
+$region = $_GET['region'] ?? 'korea';
+$countryLabel = ($region === 'japan') ? 'Japan' : 'Korea';
+?>
 <div class="country-page-header">
-  <h1 class="country-page-title"><?= ucfirst($region) ?> - Progressing</h1>
+  <h1 class="country-page-title"><?= $countryLabel ?> - Progressing</h1>
 </div>
 
 <style>
