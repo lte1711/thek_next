@@ -24,7 +24,12 @@ if ($deposit_blocked && $blocked_tx) {
       <div style="font-weight:700; margin-bottom:6px;">⚠️ Rejected Transaction - Amount Edit Only</div>
       <div style="margin-bottom:10px;">
         Transaction ID: <strong><?= htmlspecialchars($reject_tx['id']) ?></strong><br>
-        Reject Reason: <?= htmlspecialchars($reject_tx['reject_reason']) ?><br>
+        Rejected By: <strong><?= htmlspecialchars($reject_tx['reject_by'] ?? 'N/A') ?></strong><br>
+        <?php if (!empty($reject_tx['reject_reason'])): ?>
+          Reject Reason: <?= htmlspecialchars($reject_tx['reject_reason']) ?><br>
+        <?php else: ?>
+          Reject Reason: <em>(사유 없음)</em><br>
+        <?php endif; ?>
         <em>입금액만 수정할 수 있습니다. 다른 정보는 변경할 수 없습니다.</em>
       </div>
     </div>

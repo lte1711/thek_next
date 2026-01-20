@@ -310,12 +310,11 @@ $reject_mode = false;
 $reject_tx = null;
 
 $sql_reject = "
-    SELECT id, tx_date, xm_value, ultima_value, reject_reason, settle_chk, dividend_chk
+    SELECT id, tx_date, xm_value, ultima_value, reject_reason, reject_by, settle_chk, dividend_chk
     FROM user_transactions
     WHERE user_id = ?
       AND deposit_chk = 1
       AND reject_by IS NOT NULL
-      AND reject_reason IS NOT NULL
       AND COALESCE(external_done_chk, 0) = 0
       AND settle_chk != 1
       AND dividend_chk != 1
