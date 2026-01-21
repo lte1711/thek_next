@@ -103,18 +103,18 @@ try {
 
     // 2) settle_chk=1로 업데이트 (요구사항: 이것만 업그레이드)
     $settled_by = (string)($_SESSION['username'] ?? $_SESSION['user_id']); // username 세션 없으면 user_id로
-    $upd = $conn->prepare("
-        UPDATE user_transactions
-        SET settle_chk = 1,
-            settled_by = ?,
-            settled_date = NOW()
-        WHERE id = ? AND user_id = ?
-    ");
-    $upd->bind_param("sii", $settled_by, $tx_id, $user_id);
-    if (!$upd->execute()) {
-        throw new Exception(t('err.settlement_update_failed_prefix') . $upd->error);
-    }
-    $upd->close();
+        $upd = $conn->prepare("
+            UPDATE user_transactions
+            SET settle_chk = 1,
+                settled_by = ?,
+                settled_date = NOW()
+            WHERE id = ? AND user_id = ? AND settle_chk = 0
+        ");
+        $upd->bind_param("sii", $settled_by, $tx_id, $user_id);
+        if (!$upd->execute()) {
+            throw new Exception(t('err.settlement_update_failed_prefix') . $upd->error);
+        }
+        $upd->close();
 
     // 3) codepay_payout_items 등록 (가능하면)
     // - batch_key: profitshare_{region}_{tx_date}
