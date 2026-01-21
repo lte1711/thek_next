@@ -148,13 +148,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['mode'] ?? '') === 'withdra
             $xm_dividend     = $dividend * ($xm_total / $total_out);
             $ultima_dividend = $dividend * ($ultima_total / $total_out);
 
-            /* 출금 저장 */
+            /* 출금 저장 - withdrawal_chk=0 조건 추가 (동시성/중복 방지) */
 $u = "
 UPDATE user_transactions
 SET xm_total=?, ultima_total=?,
     dividend_amount=?, xm_dividend=?, ultima_dividend=?,
     withdrawal_chk=1
-WHERE id=? AND user_id=?
+WHERE id=? AND user_id=? AND withdrawal_chk=0
 LIMIT 1
 ";
 $us = $conn->prepare($u);
@@ -165,7 +165,9 @@ $us->bind_param(
     $id, $user_id
 );
 $us->execute();
+$affected = $us->affected_rows;
 $us->close();
+// affected_rows=1: 정상처리, 0: 이미 처리됨(중복 방지)
         }
     }
 
