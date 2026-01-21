@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^ssh -i C:\\\\dennis\\\\ai_test\\\\thek-next\\.pem ubuntu@15\\.164\\.165\\.240 \"cd /var/www/html/_branches/jp && grep -n \\\\\"status='ready'\\\\\" \\*\\.php\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
